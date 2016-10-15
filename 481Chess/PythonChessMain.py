@@ -63,7 +63,7 @@
 """
 
 from ChessBoard import ChessBoard
-from ChessAI import ChessAI_heuristic, ChessAI_defense, ChessAI_offense
+from ChessAI import ChessAI_heuristic, ChessAI_defense, ChessAI_offense, Off_Heuristic, Def_Heuristic
 from ChessPlayer import ChessPlayer
 from ChessGUI_text import ChessGUI_text
 from ChessGUI_pygame import ChessGUI_pygame
@@ -102,6 +102,8 @@ class PythonChessMain:
 			self.player[0] = ChessPlayer(player1Name,player1Color)
 		elif player1Type == 'randomAI':
 			self.player[0] = ChessAI_random(player1Name,player1Color)
+		elif player1Type == 'HeuristicOffense':
+			self.player[0] = Off_Heuristic(player1Name,player1Color)
 		elif player1Type == 'defenseAI':
 			self.player[0] = ChessAI_defense(player1Name,player1Color)
 		elif player1Type == 'offenseAI':
@@ -111,6 +113,8 @@ class PythonChessMain:
 			self.player[1] = ChessPlayer(player2Name,player2Color)
 		elif player2Type == 'randomAI':
 			self.player[1] = ChessAI_random(player2Name,player2Color)
+		elif player2Type == 'HeuristicDefense':
+			self.player[1] = Def_Heuristic(player2Name,player2Color)
 		elif player2Type == 'defenseAI':
 			self.player[1] = ChessAI_defense(player2Name,player2Color)
 		elif player2Type == 'offenseAI':

@@ -28,6 +28,181 @@ class ChessAI:
 	def GetType(self):
 		return self.type
 		
+class HeuristicDefense:
+	def __init__(self,name,color):
+		self.name = name
+		self.color = color
+		self.type = 'HeuristicDefense'
+		self.Rules = ChessRules()
+		
+	def GetName(self):
+		return self.name
+		
+	def GetColor(self):
+		return self.color
+		
+	def GetType(self):
+		return self.type
+		
+class HeuristicOffense:
+	def __init__(self,name,color):
+		self.name = name
+		self.color = color
+		self.type = 'HeuristicOffense'
+		self.Rules = ChessRules()
+		
+	def GetName(self):
+		return self.name
+		
+	def GetColor(self):
+		return self.color
+		
+	def GetType(self):
+		return self.type
+		
+		
+class Off_Heuristic(HeuristicOffense):
+	#heuristically pick the best legal move
+	
+	def GetMove(self,board,color):
+		#print "In ChessAI_random.GetMove"
+	
+		myPieces = self.GetMyPiecesWithLegalMoves(board,color)
+		opponentPieces = self.GetOpponentPieces(board, color)
+		
+		#calculate the piece with the best heuristic value
+		bestPiece = ComputeHeuristicMove()
+		myFromTuple = []
+		myFromTuple.append(bestPiece[0])
+		myFromTuple.append(bestPiece[1])
+		legalMoves = self.Rules.GetListOfValidMoves(board,color,myFromTuple)
+		
+		#myFromTuple = myPieces[random.randint(0,len(myPieces)-1)]
+		#legalMoves = self.Rules.GetListOfValidMoves(board,color,fromTuple)
+		#myToTuple = legalMoves[random.randint(0,len(legalMoves)-1)]
+			
+		
+		moveTuple = (myFromTuple,myToTuple)
+		return moveTuple
+		
+	def GetMyPiecesWithLegalMoves(self,board,color):
+		#print "In ChessAI_random.GetMyPiecesWithLegalMoves"
+		if color == "black":
+			myColor = 'b'
+			enemyColor = 'w'
+		else:
+			myColor = 'w'
+			enemyColor = 'b'
+			
+		#get list of my pieces
+		myPieces = []
+		for row in range(8):
+			for col in range(8):
+				piece = board[row][col]
+				if myColor in piece:
+					if len(self.Rules.GetListOfValidMoves(board,color,(row,col))) > 0:
+						myPieces.append((row,col))	
+		return myPieces
+		
+						
+	#Our 481 heuristic computes distances between our pieces and the enemy king
+	def OffenseHeuristicValue(board):
+		whiteKnight = PiecePositions(self, board, white, knight)
+		whiteKing = PiecePositions(self, board, white, king)
+		whiteRook = PiecePositions(self, board, white, rook)
+		blackKing = PiecePositions(self, board, black, king)
+		blackKnight = PiecePositions(self, board, black, knight)
+		
+		knightDistance = abs(whiteKnight[0] - blackKing[0]) + abs(whiteKnight[1] - blackKing[1]) - 4
+		kingDistance = abs(whiteKing[0] - blackKing[0]) + abs(whiteKing[1] - blackKing[1]) - 2
+		rookDistance = 1
+		rookActual = abs(whiteRook[0] - blackKing[0]) + abs(whiteRook[1] - blackKing[1])
+		
+		bkKnightDistance = abs(whiteKnight[0] - blackKnight[0]) + abs(whiteKnight[1] - blackKnight[1])
+		bkKingDistance = abs(whiteKing[0] - blackKnight[0]) + abs(whiteKing[1] - blackKnight[1])
+		bkRookDistance = abs(whiteRook[0] - blackKnight[0]) + abs(whiteRook[1] - blackKnight[1])
+		
+		toKingDistance = knightDistance + kingDistance + rookDistance
+		
+		# a few handlers to deal with heuristic values dealing with taking/prevntion of taking pieces
+		# bkKnight protects from black knight
+		# kingDistance finds check states
+		
+		if bkKnightDistance == 3:
+			toKingDistance = 50
+			
+		if bkKingDistance == 3:
+			toKingDistance = 50
+			
+		if bkRookDistance == 3:
+			toKingDistance = 50
+			
+		if knightDistance == -3:
+			toKingDistance = -10
+			
+		if kingDistance == -2:
+			toKingDistance = -10
+			
+		if rookActual == 0:
+			toKingDistance = -10
+				
+		return toKingDistance
+		
+class Def_Heuristic(HeuristicDefense):
+	#heuristically pick the best legal move
+	
+	def GetMove(self,board,color):
+		#print "In ChessAI_random.GetMove"
+	
+		myPieces = self.GetMyPiecesWithLegalMoves(board,color)
+		opponentPieces = self.GetOpponentPieces(board, color)
+		
+		#calculate the piece with the best heuristic value
+		bestPiece = ComputeHeuristicMove()
+		myFromTuple = []
+		myFromTuple.append(bestPiece[0])
+		myFromTuple.append(bestPiece[1])
+		legalMoves = self.Rules.GetListOfValidMoves(board,color,myFromTuple)
+		
+		#myFromTuple = myPieces[random.randint(0,len(myPieces)-1)]
+		#legalMoves = self.Rules.GetListOfValidMoves(board,color,fromTuple)
+		#myToTuple = legalMoves[random.randint(0,len(legalMoves)-1)]
+			
+		
+		moveTuple = (myFromTuple,myToTuple)
+		return moveTuple
+		
+	def GetMyPiecesWithLegalMoves(self,board,color):
+		#print "In ChessAI_random.GetMyPiecesWithLegalMoves"
+		if color == "black":
+			myColor = 'b'
+			enemyColor = 'w'
+		else:
+			myColor = 'w'
+			enemyColor = 'b'
+			
+		#get list of my pieces
+		myPieces = []
+		for row in range(8):
+			for col in range(8):
+				piece = board[row][col]
+				if myColor in piece:
+					if len(self.Rules.GetListOfValidMoves(board,color,(row,col))) > 0:
+						myPieces.append((row,col))	
+		return myPieces
+		
+	def DefenseHeuristicValue(board):
+		blackPieces = []
+		blackKnight = PiecePositions(self, board, black, knight)
+		blackKing = PiecePositions(self, board, black, king)
+		knightDistance = abs(piece[0] - blackKing[0]) + abs(piece[1] - blackKing[1]) - 3
+		kingDistance = abs(piece[0] - blackKing[0]) + abs(piece[1] - blackKing[1]) - 2
+		rookDistance = 1
+		
+		fromKingDistance = knightDistance + kingDistance + rookDistance
+		
+		return fromKingDistance
+	
 		
 class ChessAI_heuristic(ChessAI):
 	#heuristically pick the best legal move
@@ -72,70 +247,44 @@ class ChessAI_heuristic(ChessAI):
 						myPieces.append((row,col))	
 		return myPieces
 		
-	#GetOpponentPieces function added by CPSC 481 Group to compute heuristic by comparing distances of white and black pieces
-	def GetOpponentPieces(self, board, color):	
-		if color == "black":
-			myColor = 'b'
-			enemyColor = 'w'
-		else:
-			myColor = 'w'
-			enemyColor = 'b'
-			
-		opponentPieces = []
-		for row in range(8):
-			for col in range(8):
-				piece = board[row][col]
-				if	myColor not in piece:
-					if len(self.rules.GetListOfValidMoves(board,color,(row,col))) > 0:
-						opponentPieces.append((row,col))
 						
 	#Our 481 heuristic computes distances between our pieces and the enemy king
-	def FindHeuristicValue():
-		whitePieces = [] 
-		whitePieces.append(PiecePositions(self, board, white, knight), "knight")
-		whitePieces.append(PiecePositions(self, board, white, king), "king")
-		whitePieces.append(PiecePositions(self, board, white, rook), "rook")
+	def OffenseHeuristicValue(board):
+		whiteKnight = PiecePositions(self, board, white, knight)
+		whiteKing = PiecePositions(self, board, white, king)
+		whiteRook = PiecePositions(self, board, white, rook)
 		blackKing = PiecePositions(self, board, black, king)
-		#Creates whitePieces list that holds positions of all heuristic pieces and the black King's location 
+		blackKnight = PiecePositions(self, board, black, knight)
 		
-		bestPiece = 0
-		counter = 0
+		knightDistance = abs(whiteKnight[0] - blackKing[0]) + abs(whiteKnight[1] - blackKing[1]) - 4
+		kingDistance = abs(whiteKing[0] - blackKing[0]) + abs(whiteKing[1] - blackKing[1]) - 2
+		rookDistance = 1
+		rookActual = abs(whiteRook[0] - blackKing[0]) + abs(whiteRook[1] - blackKing[1])
 		
-		heuristicValue = []
-		for piece in whitePieces:
-			if (piece[2] == "knight"):
-				heuristicValue.append(abs(piece[0] - blackKing[0]) + abs(piece[1] - blackKing[1]) - 4)
-			elif (piece[2] == "king"):
-				heuristicValue.append(abs(piece[0] - blackKing[0]) + abs(piece[1] - blackKing[1]) - 3)
-			else:
-				if (abs(piece[0] - blackKing[0]) > abs(piece[1] - blackKing[1])):
-					heuristicValue.append(abs(piece[1] - blackKing[1]))
-				if (abs(piece[0] - blackKing[0]) > abs(piece[1] - blackKing[1])):
-					heuristicValue.append(abs(piece[0] - blackKing[0]))
+		totalDistance = knightDistance + kingDistance + rookDistance
 		
-		for value in heuristicValue:
-			largest = 0
-			if (value > largest):
-				largest = value
-				bestPiece = counter
-				if (bestPiece == 2):
-					if (heuristicValue[0] > 0 and heuristicValue[0] > heuristicValue[1]):
-						bestPiece = 0
-					else:
-						bestPiece = 1				
-			counter = counter + 1
+		if knightDistance == -3:
+			totalDistance = -10
+			
+		if kingDistance == -2:
+			totalDistance = -10
+			
+		if rookActual == 0:
+			totalDistance = -10
 				
-		return whitePieces[bestPiece]
+		return totalDistance	
 		
-	def FindHeuristicMove(myFromTuple):
-		return 0
+	def DefenseHeuristicValue(board):
+		blackPieces = []
+		blackKnight = PiecePositions(self, board, black, knight)
+		blackKing = PiecePositions(self, board, black, king)
+		knightDistance = abs(piece[0] - blackKing[0]) + abs(piece[1] - blackKing[1]) - 3
+		kingDistance = abs(piece[0] - blackKing[0]) + abs(piece[1] - blackKing[1]) - 2
+		rookDistance = 1
 		
+		totalDistance = knightDistance + kingDistance + rookDistance
 		
-		
-	
-		
-		
-		
+		return totalDistance
 		
 		
 class ChessAI_defense(ChessAI_heuristic):
