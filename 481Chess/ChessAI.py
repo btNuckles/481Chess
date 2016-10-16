@@ -138,13 +138,13 @@ class Off_Heuristic(HeuristicOffense):
 			toKingDistance = 50
 			
 		if knightDistance == -3:
-			toKingDistance = -10
+			toKingDistance = -20
 			
 		if kingDistance == -2:
-			toKingDistance = -10
+			toKingDistance = -20
 			
 		if rookActual == 0:
-			toKingDistance = -10
+			toKingDistance = -20
 				
 		return toKingDistance
 		
@@ -192,14 +192,40 @@ class Def_Heuristic(HeuristicDefense):
 		return myPieces
 		
 	def DefenseHeuristicValue(board):
-		blackPieces = []
 		blackKnight = PiecePositions(self, board, black, knight)
 		blackKing = PiecePositions(self, board, black, king)
-		knightDistance = abs(piece[0] - blackKing[0]) + abs(piece[1] - blackKing[1]) - 3
-		kingDistance = abs(piece[0] - blackKing[0]) + abs(piece[1] - blackKing[1]) - 2
+		whiteKnight = PiecePositions(self, board, white, knight)
+		whiteKing = PiecePositions(self, board, white, king)
+		whiteRook = PiecePositions(self, board, white, rook)
+		
+		knightDistance = abs(blackKing[0] - whiteKnight[0]) + abs(blackKing[1] - whiteKnight[1]) - 3
+		kingDistance = abs(blackKing[0] - whiteKing[0]) + abs(blackKing[1] - whiteKing[1]) - 2
+		rookActual = abs(whiteRook[0] - blackKing[0]) + abs(whiteRook[1] - blackKing[1])
 		rookDistance = 1
 		
+		bkKnightDistance = abs(whiteKnight[0] - blackKnight[0]) + abs(whiteKnight[1] - blackKnight[1])
+		bkKingDistance = abs(whiteKing[0] - blackKnight[0]) + abs(whiteKing[1] - blackKnight[1])
+		bkRookDistance = abs(whiteRook[0] - blackKnight[0]) + abs(whiteRook[1] - blackKnight[1])
+		
 		fromKingDistance = knightDistance + kingDistance + rookDistance
+		
+		if bkKnightDistance == 0:
+			toKingDistance = 50
+			
+		if bkKingDistance == 0:
+			toKingDistance = 50
+			
+		if bkRookDistance == 0:
+			toKingDistance = 50
+		
+		if knightDistance == -3:
+			fromKingDistance = -20
+			
+		if kingDistance == -2:
+			fromKingDistance = -20
+			
+		if rookActual == 0:
+			fromKingDistance = -20
 		
 		return fromKingDistance
 	
