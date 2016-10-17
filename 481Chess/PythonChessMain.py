@@ -72,6 +72,18 @@ from ChessGameParams import TkinterGameSetupParams
 
 from optparse import OptionParser
 import time
+import copy
+
+#Node for state tree, used to build the state tree
+class Tree(object):
+        def __init__(self, root):
+                self.root = copy.deepcopy(root) #stores copy of the board
+                self.hVal = 0 #heuristic value
+                self.children = [] #Stores "tree objects," which are the nodes
+                
+        def add_child(self, node):
+                assert isinstance(node,Tree) #Checks if the node object is of class Tree
+                self.children.append(node)
 
 class PythonChessMain:
 	def __init__(self,options):
