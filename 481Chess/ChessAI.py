@@ -11,23 +11,58 @@
 from ChessRules import ChessRules
 import random
 
-class ChessAI:
-	def __init__(self,name,color):
-		#print "In ChessAI __init__"
-		self.name = name
-		self.color = color
-		self.type = 'AI'
-		self.Rules = ChessRules()
-		
-	def GetName(self):
-		return self.name
-		
-	def GetColor(self):
-		return self.color
-		
-	def GetType(self):
-		return self.type
-		
+class Tree(object):
+        def __init__(self, board):
+                self.board = copy.deepcopy(board) #stores copy of the ChessBoard
+                self.hVal = 0 #heuristic value
+                self.children = [] #Stores "tree objects," which are the nodes
+                
+        def add_child(self, node):
+                assert isinstance(node,Tree) #Checks if the node object is of class Tree
+                self.children.append(node)
+                
+        def create_tree(self,color,rules):
+                board = self.board.GetState() #Gets the current state of chess board
+                if color == 'white':
+                        player = 'w'
+                if color == 'black':
+                        player = 'b'
+                for r in range(8):
+                        for c in range(8):
+                                if board[r][c] != 'e':
+                                        piece = board[r][c]
+                                        if piece[:1] == player: #If the piece is the current play's piece, create the children of this node
+                                                tup = (r,c) #Gets position of piece
+                                                mylist = rules.GetListOfValidMoves(board,color,tup) #Gets list of valid move for that piece
+                                                #This loops through the list of valid moves and makes the move on a temporary ChessBoard.
+                                                #Uses the temporary ChessBoard to create a child, and then appends the child to the children list.
+                                                #Each child contains the state of the board after a valid move has been made.
+                                                for moves in mylist:
+                                                        tempChessBoard = copy.deepcopy(self.board)
+                                                        tempChessBoard.MovePiece((tup,moves))
+                                                        tempTreeObj = Tree(tempChessBoard)
+                                                        self.add_child(tempTreeObj)
+
+#PROTOTYPE AI CLASS
+#class ChessAI:
+#	def __init__(self,name,color):
+#		#print "In ChessAI __init__"
+#		self.name = name
+#		self.color = color
+#		self.type = 'AI'
+#		self.Rules = ChessRules()
+#		
+#	def GetName(self):
+#		return self.name
+#		
+#	def GetColor(self):
+#		return self.color
+#		
+#	def GetType(self):
+#		return self.type
+
+# Creates basic classes for heuristic offense and defense for both teams, indicated by self.type
+	
 class HeuristicDefense:
 	def __init__(self,name,color):
 		self.name = name
@@ -60,6 +95,38 @@ class HeuristicOffense:
 	def GetType(self):
 		return self.type
 		
+class EnemyDefense:
+	def __init__(self,name,color):
+		self.name = name
+		self.color = color
+		self.type = 'EnemyDefense'
+		self.Rules = ChessRules()
+		
+	def GetName(self):
+		return self.name
+		
+	def GetColor(self):
+		return self.color
+		
+	def GetType(self):
+		return self.type
+		
+class EnemyOffense:
+	def __init__(self,name,color):
+		self.name = name
+		self.color = color
+		self.type = 'EnemyOffense'
+		self.rules = ChessRules()
+		
+	def GetName(self):
+		return self.name
+		
+	def GetColor(self):
+		return self.color
+		
+	def GetType(self):
+		return self.type
+		
 		
 class Off_Heuristic(HeuristicOffense):
 	#heuristically pick the best legal move
@@ -67,19 +134,11 @@ class Off_Heuristic(HeuristicOffense):
 	def GetMove(self,board,color):
 		#print "In ChessAI_random.GetMove"
 	
-		myPieces = self.GetMyPiecesWithLegalMoves(board,color)
-		opponentPieces = self.GetOpponentPieces(board, color)
-		
-		#calculate the piece with the best heuristic value
-		bestPiece = ComputeHeuristicMove()
-		myFromTuple = []
-		myFromTuple.append(bestPiece[0])
-		myFromTuple.append(bestPiece[1])
-		legalMoves = self.Rules.GetListOfValidMoves(board,color,myFromTuple)
-		
-		#myFromTuple = myPieces[random.randint(0,len(myPieces)-1)]
-		#legalMoves = self.Rules.GetListOfValidMoves(board,color,fromTuple)
-		#myToTuple = legalMoves[random.randint(0,len(legalMoves)-1)]
+		#THIS IS WHERE WE CREATE THE BOARD STATE MINI-MAX TREE
+		#WE THEN APPLY OUR HEURISTIC FUNCTION TO EVERY CHILD NODE AT THE BOTTOM OF THE TREE
+		#THEN RETURN THE HEURISTIC VALUES TO THE TOP RECURSIVELY
+		#THE MOVE THAT IS THE BEST CHOICE SHOULD BE SELECTED
+		#THAT MOVE TUPLE IS CREATED AND RETURN TO MAIN
 			
 		
 		moveTuple = (myFromTuple,myToTuple)
@@ -103,6 +162,34 @@ class Off_Heuristic(HeuristicOffense):
 					if len(self.Rules.GetListOfValidMoves(board,color,(row,col))) > 0:
 						myPieces.append((row,col))	
 		return myPieces
+		
+	def PiecePositions(self,board,color,pieceType):
+		#returns list of piece positions; will be empty if color piece doesn't exist on board
+		if color == "black":
+			myColor = 'b'
+		else:
+			myColor = 'w'
+			
+		if pieceType == "king":
+			myPieceType = 'K'
+		elif pieceType == "queen":
+			myPieceType = 'Q'
+		elif pieceType == "rook":
+			myPieceType = 'R'
+		elif pieceType == "knight":
+			myPieceType = 'T'
+		elif pieceType == "bishop":
+			myPieceType = 'B'
+		elif pieceType == "pawn":
+			myPieceType = 'P'
+
+		piecePositions = []
+		for row in range(8):
+			for col in range(8):
+				piece = board[row][col]
+				if myColor in piece and myPieceType in piece:
+					piecePositions.append((row,col))	
+		return piecePositions
 		
 						
 	#Our 481 heuristic computes distances between our pieces and the enemy king
@@ -157,17 +244,11 @@ class Def_Heuristic(HeuristicDefense):
 		myPieces = self.GetMyPiecesWithLegalMoves(board,color)
 		opponentPieces = self.GetOpponentPieces(board, color)
 		
-		#calculate the piece with the best heuristic value
-		bestPiece = ComputeHeuristicMove()
-		myFromTuple = []
-		myFromTuple.append(bestPiece[0])
-		myFromTuple.append(bestPiece[1])
-		legalMoves = self.Rules.GetListOfValidMoves(board,color,myFromTuple)
-		
-		#myFromTuple = myPieces[random.randint(0,len(myPieces)-1)]
-		#legalMoves = self.Rules.GetListOfValidMoves(board,color,fromTuple)
-		#myToTuple = legalMoves[random.randint(0,len(legalMoves)-1)]
-			
+		#THIS IS WHERE WE CREATE THE BOARD STATE MINI-MAX TREE
+		#WE THEN APPLY OUR HEURISTIC FUNCTION TO EVERY CHILD NODE AT THE BOTTOM OF THE TREE
+		#THEN RETURN THE HEURISTIC VALUES TO THE TOP RECURSIVELY
+		#THE MOVE THAT IS THE BEST CHOICE SHOULD BE SELECTED
+		#THAT MOVE TUPLE IS CREATED AND RETURN TO MAIN
 		
 		moveTuple = (myFromTuple,myToTuple)
 		return moveTuple
@@ -190,6 +271,34 @@ class Def_Heuristic(HeuristicDefense):
 					if len(self.Rules.GetListOfValidMoves(board,color,(row,col))) > 0:
 						myPieces.append((row,col))	
 		return myPieces
+		
+	def PiecePositions(self,board,color,pieceType):
+		#returns list of piece positions; will be empty if color piece doesn't exist on board
+		if color == "black":
+			myColor = 'b'
+		else:
+			myColor = 'w'
+			
+		if pieceType == "king":
+			myPieceType = 'K'
+		elif pieceType == "queen":
+			myPieceType = 'Q'
+		elif pieceType == "rook":
+			myPieceType = 'R'
+		elif pieceType == "knight":
+			myPieceType = 'T'
+		elif pieceType == "bishop":
+			myPieceType = 'B'
+		elif pieceType == "pawn":
+			myPieceType = 'P'
+
+		piecePositions = []
+		for row in range(8):
+			for col in range(8):
+				piece = board[row][col]
+				if myColor in piece and myPieceType in piece:
+					piecePositions.append((row,col))	
+		return piecePositions
 		
 	def DefenseHeuristicValue(board):
 		blackKnight = PiecePositions(self, board, black, knight)
@@ -228,92 +337,25 @@ class Def_Heuristic(HeuristicDefense):
 			fromKingDistance = -20
 		
 		return fromKingDistance
-	
 		
-class ChessAI_heuristic(ChessAI):
-	#heuristically pick the best legal move
-	
-	def GetMove(self,board,color):
-		#print "In ChessAI_random.GetMove"
-	
-		myPieces = self.GetMyPiecesWithLegalMoves(board,color)
-		opponentPieces = self.GetOpponentPieces(board, color)
+class Def_Enemy(EnemyDefense):
+	#HERE WE READ THE INPUT OF PLAYER Y TEXT FILE
+	#WE USE THIS CLASS WHEN THE OPPONENT GROUP IS ON DEFENSE AND WE ARE ON OFFENSE
+	#READ FROM THE TEXT FILE THEN CONVERT TO THE FORMAT OF MOVETUPLE
+	#USE THIS MOVE TUPLE TO USE THE MAKEMOVE FUNCTION IN MAIN FOR CURRENT PLAYER TYPE
+	#THIS IS FOR THE SAKE OF UPDATING OUR OWN BOARD SO WE CAN MAKE OUR NEXT MOVE
 		
-		#calculate the piece with the best heuristic value
-		bestPiece = ComputeHeuristicMove()
-		myFromTuple = []
-		myFromTuple.append(bestPiece[0])
-		myFromTuple.append(bestPiece[1])
-		legalMoves = self.Rules.GetListOfValidMoves(board,color,myFromTuple)
-		
-		#myFromTuple = myPieces[random.randint(0,len(myPieces)-1)]
-		#legalMoves = self.Rules.GetListOfValidMoves(board,color,fromTuple)
-		#myToTuple = legalMoves[random.randint(0,len(legalMoves)-1)]
-			
-		
-		moveTuple = (myFromTuple,myToTuple)
-		return moveTuple
-		
-	def GetMyPiecesWithLegalMoves(self,board,color):
-		#print "In ChessAI_random.GetMyPiecesWithLegalMoves"
-		if color == "black":
-			myColor = 'b'
-			enemyColor = 'w'
-		else:
-			myColor = 'w'
-			enemyColor = 'b'
-			
-		#get list of my pieces
-		myPieces = []
-		for row in range(8):
-			for col in range(8):
-				piece = board[row][col]
-				if myColor in piece:
-					if len(self.Rules.GetListOfValidMoves(board,color,(row,col))) > 0:
-						myPieces.append((row,col))	
-		return myPieces
-		
-						
-	#Our 481 heuristic computes distances between our pieces and the enemy king
-	def OffenseHeuristicValue(board):
-		whiteKnight = PiecePositions(self, board, white, knight)
-		whiteKing = PiecePositions(self, board, white, king)
-		whiteRook = PiecePositions(self, board, white, rook)
-		blackKing = PiecePositions(self, board, black, king)
-		blackKnight = PiecePositions(self, board, black, knight)
-		
-		knightDistance = abs(whiteKnight[0] - blackKing[0]) + abs(whiteKnight[1] - blackKing[1]) - 4
-		kingDistance = abs(whiteKing[0] - blackKing[0]) + abs(whiteKing[1] - blackKing[1]) - 2
-		rookDistance = 1
-		rookActual = abs(whiteRook[0] - blackKing[0]) + abs(whiteRook[1] - blackKing[1])
-		
-		totalDistance = knightDistance + kingDistance + rookDistance
-		
-		if knightDistance == -3:
-			totalDistance = -10
-			
-		if kingDistance == -2:
-			totalDistance = -10
-			
-		if rookActual == 0:
-			totalDistance = -10
-				
-		return totalDistance	
-		
-	def DefenseHeuristicValue(board):
-		blackPieces = []
-		blackKnight = PiecePositions(self, board, black, knight)
-		blackKing = PiecePositions(self, board, black, king)
-		knightDistance = abs(piece[0] - blackKing[0]) + abs(piece[1] - blackKing[1]) - 3
-		kingDistance = abs(piece[0] - blackKing[0]) + abs(piece[1] - blackKing[1]) - 2
-		rookDistance = 1
-		
-		totalDistance = knightDistance + kingDistance + rookDistance
-		
-		return totalDistance
+class Off_Enemy(EnemyOffense):
+	#HERE WE READ THE INPUT OF PLAYER X TEXT FILE
+	#WE USE THIS CLASS WHEN THE OPPONENT GROUP IS ON OFFENSE AND WE ARE ON DEFENSE
+	#READ FROM THE TEXT FILE THEN CONVERT TO THE FORMAT OF MOVETUPLE
+	#USE THIS MOVE TUPLE TO USE THE MAKEMOVE FUNCTION IN MAIN FOR CURRENT PLAYER TYPE
+	#THIS IS FOR THE SAKE OF UPDATING OUR OWN BOARD SO WE CAN MAKE OUR NEXT MOVE
+
+
 		
 		
-class ChessAI_defense(ChessAI_heuristic):
+"""class ChessAI_defense(ChessAI_heuristic):
 	#For each piece, find it's legal moves.
 	#Find legal moves for all opponent pieces.
 	#Throw out my legal moves that the opponent could get next turn.
@@ -480,34 +522,6 @@ class ChessAI_defense(ChessAI_heuristic):
 				
 		return movesThatPutEnemyInCheck
 
-	def PiecePositions(self,board,color,pieceType):
-		#returns list of piece positions; will be empty if color piece doesn't exist on board
-		if color == "black":
-			myColor = 'b'
-		else:
-			myColor = 'w'
-			
-		if pieceType == "king":
-			myPieceType = 'K'
-		elif pieceType == "queen":
-			myPieceType = 'Q'
-		elif pieceType == "rook":
-			myPieceType = 'R'
-		elif pieceType == "knight":
-			myPieceType = 'T'
-		elif pieceType == "bishop":
-			myPieceType = 'B'
-		elif pieceType == "pawn":
-			myPieceType = 'P'
-
-		piecePositions = []
-		for row in range(8):
-			for col in range(8):
-				piece = board[row][col]
-				if myColor in piece and myPieceType in piece:
-					piecePositions.append((row,col))	
-		return piecePositions
-
 	def PieceCanBeCaptured(self,board,color,p):	
 		#true if opponent can capture the piece as board currently exists.
 		if color == "black":
@@ -608,3 +622,4 @@ if __name__ == "__main__":
 	print "protectedMoveTuples = ", cb.ConvertMoveTupleListToAlgebraicNotation(protectedMoveTuples)
 	print "movesThatPutEnemyInCheck = ", cb.ConvertMoveTupleListToAlgebraicNotation(movesThatPutEnemyInCheck)
 	c = raw_input("Press any key to quit.")#pause at the end
+	"""

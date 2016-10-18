@@ -63,7 +63,7 @@
 """
 
 from ChessBoard import ChessBoard
-from ChessAI import ChessAI_heuristic, ChessAI_defense, ChessAI_offense, Off_Heuristic, Def_Heuristic
+from ChessAI import HeuristicDefense, HeuristicOffense, Off_Heuristic, Def_Heuristic, EnemyDefense, EnemyOffense, Def_Enemy, Off_Enemy
 from ChessPlayer import ChessPlayer
 from ChessGUI_text import ChessGUI_text
 from ChessGUI_pygame import ChessGUI_pygame
@@ -104,10 +104,8 @@ class PythonChessMain:
 			self.player[0] = ChessAI_random(player1Name,player1Color)
 		elif player1Type == 'HeuristicOffense':
 			self.player[0] = Off_Heuristic(player1Name,player1Color)
-		elif player1Type == 'defenseAI':
-			self.player[0] = ChessAI_defense(player1Name,player1Color)
-		elif player1Type == 'offenseAI':
-			self.player[0] = ChessAI_offense(player1Name,player1Color)
+		elif player1Type == 'EnemyOffense':
+			self.player[0] = Off_Enemy(player1Name,player1Color)
 			
 		if player2Type == 'human':
 			self.player[1] = ChessPlayer(player2Name,player2Color)
@@ -115,10 +113,8 @@ class PythonChessMain:
 			self.player[1] = ChessAI_random(player2Name,player2Color)
 		elif player2Type == 'HeuristicDefense':
 			self.player[1] = Def_Heuristic(player2Name,player2Color)
-		elif player2Type == 'defenseAI':
-			self.player[1] = ChessAI_defense(player2Name,player2Color)
-		elif player2Type == 'offenseAI':
-			self.player[1] = ChessAI_offense(player2Name,player2Color)
+		elif player2Type == 'EnemyDefense':
+			self.player[1] = Def_Enemy(player2Name,player2Color)
 			
 		if 'AI' in self.player[0].GetType() and 'AI' in self.player[1].GetType():
 			self.AIvsAI = True
@@ -159,14 +155,26 @@ class PythonChessMain:
 			self.Gui.PrintMessage("-----%s-----" % baseMsg)
 			self.Gui.Draw(board)
 			if self.Rules.IsInCheck(board,currentColor):
-				self.Gui.PrintMessage("Warning..."+self.player[currentPlayerIndex].GetName()+" ("+self.player[currentPlayerIndex].GetColor()+") is in check!")
-			
-			if self.player[currentPlayerIndex].GetType() == 'AI':
-				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor) 
+				self.Gui.PrintMessage("Warning..."+self.player[currentPlayerIndex].GetName()+" ("+self.player[currentPlayerIndex].GetColor()+") is in check!") 
+			if self.player[currentPlayerIndex].GetType() == 'HeuristicDefense':
+			#	then get new move to put into MoveTuple and make move
+			#	write to text file player_ytext below before changing currentPlayerIndex below
+			elif self.player[currentPlayerIndex].GetType() == 'HeuristicOffense':
+			#	then get new move to put into Movetuple and make move
+			#	write to text file player_xtext below before changing currentPlayerIndex below
+			elif self.player[currentPlayerIndex].GetType() == 'EnemyDefense'
+				#CALL READ FUNCTION HERE FOR ENEMY PLAYER == DEFENSE KRUTIK
+				#moveTuple = defense read function
+			elif self.player[currentPlayerIndex].GetType() == 'EnemyOffense'
+				#CALL READ FUNCTION HERE FOR ENEMY PLAYER == OFFENSE KRUTIK
+				#moveTuple = offense read function
 			else:
 				moveTuple = self.Gui.GetPlayerInput(board,currentColor)
 			moveReport = self.Board.MovePiece(moveTuple) #moveReport = string like "White Bishop moves from A1 to C3" (+) "and captures ___!"
 			self.Gui.PrintMessage(moveReport)
+			#	use current player index to determine what file to write to
+			#	index = 0 is player x / "white" / offense
+			#	index = 1 is player y / "black" / defense
 			currentPlayerIndex = (currentPlayerIndex+1)%2 #this will cause the currentPlayerIndex to toggle between 1 and 0
 			if self.AIvsAI and self.AIpause:
 				time.sleep(self.AIpauseSeconds)

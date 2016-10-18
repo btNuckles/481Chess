@@ -36,8 +36,8 @@ class TkinterGameSetupParams:
 		Radiobutton(self.frame, text="Human",variable=self.tk_player1Type,value="human").grid(row=2,column=2)
 		Radiobutton(self.frame, text="Random AI",variable=self.tk_player1Type,value="randomAI").grid(row=2,column=3)
 		Radiobutton(self.frame, text = "Heuristic Offense", variable= self.tk_player1Type, value="HeuristicOffense").grid(row=2,column=4)
-		Radiobutton(self.frame, text="Defense AI",variable=self.tk_player1Type,value="defenseAI").grid(row=2,column=5)
-		Radiobutton(self.frame, text="Offense AI",variable=self.tk_player1Type,value="offenseAI").grid(row=2,column=6)
+		Radiobutton(self.frame, text = "Enemy Offense", variable= self.tk_player1Type, value="EnemyOffense").grid(row=2,column=5)
+
 		self.tk_player1Type.set("human")
 			
 		
@@ -50,8 +50,7 @@ class TkinterGameSetupParams:
 		Radiobutton(self.frame, text="Human",variable=self.tk_player2Type,value="human").grid(row=3,column=2)
 		Radiobutton(self.frame, text="Random AI",variable=self.tk_player2Type,value="randomAI").grid(row=3,column=3)
 		Radiobutton(self.frame, text="Heuristic Defense",variable=self.tk_player2Type,value="HeuristicDefense").grid(row=3,column=4)
-		Radiobutton(self.frame, text="Defense AI",variable=self.tk_player2Type,value="defenseAI").grid(row=3,column=5)
-		Radiobutton(self.frame, text="Offense AI",variable=self.tk_player2Type,value="offenseAI").grid(row=3,column=6)
+		Radiobutton(self.frame, text = "Enemy Defense", variable= self.tk_player2Type, value="EnemyDefense").grid(row=3,column=5)
 		self.tk_player2Type.set("defenseAI")
 		
 
