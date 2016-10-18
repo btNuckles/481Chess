@@ -86,7 +86,7 @@ class ChessAI_heuristic(ChessAI):
 			for col in range(8):
 				piece = board[row][col]
 				if	myColor not in piece:
-					if len(self.rules.GetListOfValidMoves(board,color,(row,col))) > 0:
+					if len(self.Rules.GetListOfValidMoves(board,color,(row,col))) > 0:
 						opponentPieces.append((row,col))
 						
 	#Our 481 heuristic computes distances between our pieces and the enemy king
