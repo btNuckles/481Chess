@@ -77,6 +77,7 @@ import copy
 #Node for state tree, used to build the state tree
 class Tree(object):
         def __init__(self, board):
+                assert isinstance(board,ChessBoard)
                 self.board = copy.deepcopy(board) #stores copy of the ChessBoard
                 self.hVal = 0 #heuristic value
                 self.children = [] #Stores "tree objects," which are the nodes
@@ -85,7 +86,9 @@ class Tree(object):
                 assert isinstance(node,Tree) #Checks if the node object is of class Tree
                 self.children.append(node)
                 
-        def create_tree(self,color,rules):
+        def create_tree(self,color,rules,ply):
+                if ply == 0:
+                        return ply
                 board = self.board.GetState() #Gets the current state of chess board
                 if color == 'white':
                         player = 'w'
@@ -106,7 +109,12 @@ class Tree(object):
                                                         tempChessBoard.MovePiece((tup,moves))
                                                         tempTreeObj = Tree(tempChessBoard)
                                                         self.add_child(tempTreeObj)
-                                                
+                                                        for child in self.children:
+                                                                if player == 'b':
+                                                                        color = 'white'
+                                                                elif player == 'w':
+                                                                        color = 'black'
+                                                        child.create_tree(color,rules,ply-1)                                                
 class PythonChessMain:
         def __init__(self,options):
                 if options.debug:

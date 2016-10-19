@@ -13,6 +13,7 @@ import random
 
 class Tree(object):
         def __init__(self, board):
+                assert isinstance(board,ChessBoard)
                 self.board = copy.deepcopy(board) #stores copy of the ChessBoard
                 self.hVal = 0 #heuristic value
                 self.children = [] #Stores "tree objects," which are the nodes
@@ -21,7 +22,9 @@ class Tree(object):
                 assert isinstance(node,Tree) #Checks if the node object is of class Tree
                 self.children.append(node)
                 
-        def create_tree(self,color,rules):
+        def create_tree(self,color,rules,ply):
+                if ply == 0:
+                        return ply
                 board = self.board.GetState() #Gets the current state of chess board
                 if color == 'white':
                         player = 'w'
@@ -42,6 +45,12 @@ class Tree(object):
                                                         tempChessBoard.MovePiece((tup,moves))
                                                         tempTreeObj = Tree(tempChessBoard)
                                                         self.add_child(tempTreeObj)
+                                                        for child in self.children:
+                                                                if player == 'b':
+                                                                        color = 'white'
+                                                                elif player == 'w':
+                                                                        color = 'black'
+                                                        child.create_tree(color,rules,ply-1)                                                        
 
 #PROTOTYPE AI CLASS
 #class ChessAI:
@@ -337,23 +346,20 @@ class Def_Heuristic(HeuristicDefense):
 		
 		return fromKingDistance
 		
-class Def_Enemy(EnemyDefense):
+#class Def_Enemy(EnemyDefense):
 	#HERE WE READ THE INPUT OF PLAYER Y TEXT FILE
 	#WE USE THIS CLASS WHEN THE OPPONENT GROUP IS ON DEFENSE AND WE ARE ON OFFENSE
 	#READ FROM THE TEXT FILE THEN CONVERT TO THE FORMAT OF MOVETUPLE
 	#USE THIS MOVE TUPLE TO USE THE MAKEMOVE FUNCTION IN MAIN FOR CURRENT PLAYER TYPE
 	#THIS IS FOR THE SAKE OF UPDATING OUR OWN BOARD SO WE CAN MAKE OUR NEXT MOVE
 		
-class Off_Enemy(EnemyOffense):
+#class Off_Enemy(EnemyOffense):
 	#HERE WE READ THE INPUT OF PLAYER X TEXT FILE
 	#WE USE THIS CLASS WHEN THE OPPONENT GROUP IS ON OFFENSE AND WE ARE ON DEFENSE
 	#READ FROM THE TEXT FILE THEN CONVERT TO THE FORMAT OF MOVETUPLE
 	#USE THIS MOVE TUPLE TO USE THE MAKEMOVE FUNCTION IN MAIN FOR CURRENT PLAYER TYPE
 	#THIS IS FOR THE SAKE OF UPDATING OUR OWN BOARD SO WE CAN MAKE OUR NEXT MOVE
 
-
-		
-		
 """class ChessAI_defense(ChessAI_heuristic):
 	#For each piece, find it's legal moves.
 	#Find legal moves for all opponent pieces.
