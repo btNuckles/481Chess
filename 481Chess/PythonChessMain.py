@@ -3,10 +3,10 @@
  Project: Python Chess
  File name: PythonChessMain.py
  Description:  Chess for player vs. player, player vs. AI, or AI vs. AI.
-	Uses Tkinter to get initial game parameters.  Uses Pygame to draw the 
-	board and pieces and to get user mouse clicks.  Run with the "-h" option 
-	to get full listing of available command line flags.  
-	
+        Uses Tkinter to get initial game parameters.  Uses Pygame to draw the 
+        board and pieces and to get user mouse clicks.  Run with the "-h" option 
+        to get full listing of available command line flags.  
+        
  Copyright (C) 2009 Steve Osborne, srosborne (at) gmail.com
  http://yakinikuman.wordpress.com/
  *******
@@ -72,31 +72,65 @@ from ChessGameParams import TkinterGameSetupParams
 
 from optparse import OptionParser
 import time
+import copy
 
+#Node for state tree, used to build the state tree
+class Tree(object):
+        def __init__(self, board):
+                self.board = copy.deepcopy(board) #stores copy of the ChessBoard
+                self.hVal = 0 #heuristic value
+                self.children = [] #Stores "tree objects," which are the nodes
+                
+        def add_child(self, node):
+                assert isinstance(node,Tree) #Checks if the node object is of class Tree
+                self.children.append(node)
+                
+        def create_tree(self,color,rules):
+                board = self.board.GetState() #Gets the current state of chess board
+                if color == 'white':
+                        player = 'w'
+                if color == 'black':
+                        player = 'b'
+                for r in range(8):
+                        for c in range(8):
+                                if board[r][c] != 'e':
+                                        piece = board[r][c]
+                                        if piece[:1] == player: #If the piece is the current play's piece, create the children of this node
+                                                tup = (r,c) #Gets position of piece
+                                                mylist = rules.GetListOfValidMoves(board,color,tup) #Gets list of valid move for that piece
+                                                #This loops through the list of valid moves and makes the move on a temporary ChessBoard.
+                                                #Uses the temporary ChessBoard to create a child, and then appends the child to the children list.
+                                                #Each child contains the state of the board after a valid move has been made.
+                                                for moves in mylist:
+                                                        tempChessBoard = copy.deepcopy(self.board)
+                                                        tempChessBoard.MovePiece((tup,moves))
+                                                        tempTreeObj = Tree(tempChessBoard)
+                                                        self.add_child(tempTreeObj)
+                                                
 class PythonChessMain:
-	def __init__(self,options):
-		if options.debug:
-			self.Board = ChessBoard(2)
-			self.debugMode = True
-		else:
-			self.Board = ChessBoard(0)#0 for normal board setup; see ChessBoard class for other options (for testing purposes)
-			self.debugMode = False
+        def __init__(self,options):
+                if options.debug:
+                        self.Board = ChessBoard(2)
+                        self.debugMode = True
+                else:
+                        self.Board = ChessBoard(0)#0 for normal board setup; see ChessBoard class for other options (for testing purposes)
+                        self.debugMode = False
 
-		self.Rules = ChessRules()
+                self.Rules = ChessRules()
+                
+        def SetUp(self,options):
+                #gameSetupParams: Player 1 and 2 Name, Color, Human/AI level
+                if self.debugMode:
+                        player1Name = 'Kasparov'
+                        player1Type = 'human'
+                        player1Color = 'white'
+                        player2Name = 'Light Blue'
+                        player2Type = 'randomAI'
+                        player2Color = 'black'          
+                else:
+                        GameParams = TkinterGameSetupParams()
+                        (player1Name, player1Color, player1Type, player2Name, player2Color, player2Type) = GameParams.GetGameSetupParams()
 		
-	def SetUp(self,options):
-		#gameSetupParams: Player 1 and 2 Name, Color, Human/AI level
-		if self.debugMode:
-			player1Name = 'Kasparov'
-			player1Type = 'human'
-			player1Color = 'white'
-			player2Name = 'Light Blue'
-			player2Type = 'randomAI'
-			player2Color = 'black'		
-		else:
-			GameParams = TkinterGameSetupParams()
-			(player1Name, player1Color, player1Type, player2Name, player2Color, player2Type) = GameParams.GetGameSetupParams()
-
 		self.player = [0,0]
 		if player1Type == 'human':
 			self.player[0] = ChessPlayer(player1Name,player1Color)
@@ -183,17 +217,16 @@ class PythonChessMain:
 		winnerIndex = (currentPlayerIndex+1)%2
 		self.Gui.PrintMessage(self.player[winnerIndex].GetName()+" ("+self.player[winnerIndex].GetColor()+") won the game!")
 		self.Gui.EndGame(board)
-		
 
 parser = OptionParser()
 parser.add_option("-d", dest="debug",
-				  action="store_true", default=False, help="Enable debug mode (different starting board configuration)")
+                                  action="store_true", default=False, help="Enable debug mode (different starting board configuration)")
 parser.add_option("-t", dest="text",
-				  action="store_true", default=False, help="Use text-based GUI")
+                                  action="store_true", default=False, help="Use text-based GUI")
 parser.add_option("-o", dest="old",
-				  action="store_true", default=False, help="Use old graphics in pygame GUI")
+                                  action="store_true", default=False, help="Use old graphics in pygame GUI")
 parser.add_option("-p", dest="pauseSeconds", metavar="SECONDS",
-				  action="store", default=0, help="Sets time to pause between moves in AI vs. AI games (default = 0)")
+                                  action="store", default=0, help="Sets time to pause between moves in AI vs. AI games (default = 0)")
 
 
 (options,args) = parser.parse_args()
@@ -203,4 +236,4 @@ game.SetUp(options)
 game.MainLoop()
 
 
-	
+        

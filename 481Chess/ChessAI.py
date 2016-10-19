@@ -190,7 +190,6 @@ class Off_Heuristic(HeuristicOffense):
 				if myColor in piece and myPieceType in piece:
 					piecePositions.append((row,col))	
 		return piecePositions
-		
 						
 	#Our 481 heuristic computes distances between our pieces and the enemy king
 	def OffenseHeuristicValue(board):
