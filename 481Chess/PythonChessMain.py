@@ -63,7 +63,7 @@
 """
 
 from ChessBoard import ChessBoard
-from ChessAI import HeuristicDefense, Def_Heuristic#, HeuristicOffense, Off_Heuristic, EnemyDefense, EnemyOffense, Def_Enemy, Off_Enemy
+from ChessAI import HeuristicDefense, Def_Heuristic, HeuristicOffense, Off_Heuristic#, EnemyDefense, EnemyOffense, Def_Enemy, Off_Enemy
 from ChessPlayer import ChessPlayer
 from ChessGUI_text import ChessGUI_text
 from ChessGUI_pygame import ChessGUI_pygame
@@ -145,7 +145,7 @@ class PythonChessMain:
 		elif player1Type == 'randomAI':
 			self.player[0] = ChessAI_random(player1Name,player1Color)
 		elif player1Type == 'HeuristicOffense':
-			self.player[0] = Off_Heuristic(player1Name,player1Color)
+			self.player[0] = Off_Heuristic(player1Name,player1Color, self.Board)
 		elif player1Type == 'EnemyOffense':
 			self.player[0] = Off_Enemy(player1Name,player1Color)
 			
@@ -183,6 +183,8 @@ class PythonChessMain:
 	def MainLoop(self):
 		currentPlayerIndex = 0
 		turnCount = 0
+		open("log_X.txt", "w").close()
+		open("log_Y.txt", "w").close()
 		while not self.Rules.IsCheckmate(self.Board.GetState(),self.player[currentPlayerIndex].color):
 			board = self.Board.GetState()
 			currentColor = self.player[currentPlayerIndex].GetColor()
@@ -196,14 +198,22 @@ class PythonChessMain:
 			baseMsg = "TURN %s - %s (%s)" % (str(turnCount),self.player[currentPlayerIndex].GetName(),currentColor)
 			self.Gui.PrintMessage("-----%s-----" % baseMsg)
 			self.Gui.Draw(board)
+			if currentColor == "white":
+				currentPlayer = "X"
+			if currentColor == "black":
+				currentPlayer = "Y"
 			if self.Rules.IsInCheck(board,currentColor):
 				self.Gui.PrintMessage("Warning..."+self.player[currentPlayerIndex].GetName()+" ("+self.player[currentPlayerIndex].GetColor()+") is in check!") 
 			if self.player[currentPlayerIndex].GetType() == 'HeuristicDefense':
 			#	then get new move to put into MoveTuple and make move
+				currentPlayer = "Y"
 				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor)
+				self.WriteMove(board, moveTuple, currentPlayer, turnCount)
 			#	write to text file player_ytext below before changing currentPlayerIndex below
-
-			# elif self.player[currentPlayerIndex].GetType() == 'HeuristicOffense':
+			elif self.player[currentPlayerIndex].GetType() == 'HeuristicOffense':
+				currentPlayer = "X"
+				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor)
+				self.WriteMove(board, moveTuple, currentPlayer, turnCount)
 			# #	then get new move to put into Movetuple and make move
 			# #	write to text file player_xtext below before changing currentPlayerIndex below
 			# elif self.player[currentPlayerIndex].GetType() == 'EnemyDefense'
@@ -222,11 +232,44 @@ class PythonChessMain:
 			currentPlayerIndex = (currentPlayerIndex+1)%2 #this will cause the currentPlayerIndex to toggle between 1 and 0
 			if self.AIvsAI and self.AIpause:
 				time.sleep(self.AIpauseSeconds)
-		
 		self.Gui.PrintMessage("CHECKMATE!")
 		winnerIndex = (currentPlayerIndex+1)%2
 		self.Gui.PrintMessage(self.player[winnerIndex].GetName()+" ("+self.player[winnerIndex].GetColor()+") won the game!")
 		self.Gui.EndGame(board)
+		
+
+
+	def WriteMove(self, board, tuple, currentPlayer, turnCount):
+		#a-g columns
+		#1-8 rows
+		pieceRow = tuple[0][0]
+		pieceCol = tuple[0][1]
+		pieceToMove = board[pieceRow][pieceCol]
+		
+		if tuple[1][1] == 0:
+			columnLetter = 'a'
+		elif tuple[1][1] == 1:
+			columnLetter = 'b'
+		elif tuple[1][1] == 2:
+			columnLetter = 'c'
+		elif tuple[1][1] == 3:
+			columnLetter = 'd'
+		elif tuple[1][1] == 4:
+			columnLetter = 'e'
+		elif tuple[1][1] == 5:
+			columnLetter = 'f'
+		elif tuple[1][1] == 6:
+			columnLetter = 'g'
+		elif tuple[1][1] == 7:
+			columnLetter = 'h'
+			
+		fileName = "log_" + currentPlayer + ".txt"
+		file = open(fileName, "a")
+		file.write(str(turnCount) + " " + currentPlayer + ":" + pieceToMove[1] + ":" + columnLetter + str(tuple[1][0] + 1) + "\n")
+		file.close()
+			
+			
+
 
 parser = OptionParser()
 parser.add_option("-d", dest="debug",
