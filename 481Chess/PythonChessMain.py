@@ -63,7 +63,7 @@
 """
 
 from ChessBoard import ChessBoard
-from ChessAI import HeuristicDefense, Def_Heuristic#, HeuristicOffense, Off_Heuristic, EnemyDefense, EnemyOffense, Def_Enemy, Off_Enemy
+from ChessAI import HeuristicDefense, Def_Heuristic, EnemyDefense, Def_Enemy#, HeuristicOffense, Off_Heuristic, EnemyDefense, EnemyOffense, Def_Enemy, Off_Enemy
 from ChessPlayer import ChessPlayer
 from ChessGUI_text import ChessGUI_text
 from ChessGUI_pygame import ChessGUI_pygame
@@ -206,8 +206,9 @@ class PythonChessMain:
 			# elif self.player[currentPlayerIndex].GetType() == 'HeuristicOffense':
 			# #	then get new move to put into Movetuple and make move
 			# #	write to text file player_xtext below before changing currentPlayerIndex below
-			# elif self.player[currentPlayerIndex].GetType() == 'EnemyDefense'
+			elif self.player[currentPlayerIndex].GetType() == 'EnemyDefense':
 			# 	#CALL READ FUNCTION HERE FOR ENEMY PLAYER == DEFENSE KRUTIK
+				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor)
 			# 	#moveTuple = defense read function
 			# elif self.player[currentPlayerIndex].GetType() == 'EnemyOffense'
 			# 	#CALL READ FUNCTION HERE FOR ENEMY PLAYER == OFFENSE KRUTIK

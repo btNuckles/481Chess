@@ -390,12 +390,57 @@ class Def_Heuristic(HeuristicDefense):
 		
 		return fromKingDistance
 		
-#class Def_Enemy(EnemyDefense):
+class Def_Enemy(EnemyDefense):
 	#HERE WE READ THE INPUT OF PLAYER Y TEXT FILE
 	#WE USE THIS CLASS WHEN THE OPPONENT GROUP IS ON DEFENSE AND WE ARE ON OFFENSE
 	#READ FROM THE TEXT FILE THEN CONVERT TO THE FORMAT OF MOVETUPLE
 	#USE THIS MOVE TUPLE TO USE THE MAKEMOVE FUNCTION IN MAIN FOR CURRENT PLAYER TYPE
 	#THIS IS FOR THE SAKE OF UPDATING OUR OWN BOARD SO WE CAN MAKE OUR NEXT MOVE
+
+	def GetMove(self, board, color):
+		textFile = open("log_Y.txt")
+		for line in textFile:
+			pass
+		line = line.split(" ")
+		token = line[1].split(':')
+		
+		pieceType = token[1]
+		locationToMove = token[2]
+
+		mypiecePosition = self.PiecePositions(board, color, pieceType)
+
+		textFile.close()
+
+		return ((0,0), (1,1))
+
+	def PiecePositions(self,board,color,pieceType):
+		#returns list of piece positions; will be empty if color piece doesn't exist on board
+		if color == "black":
+			myColor = 'b'
+		else:
+			myColor = 'w'
+			
+		if pieceType == "king":
+			myPieceType = 'K'
+		elif pieceType == "queen":
+			myPieceType = 'Q'
+		elif pieceType == "rook":
+			myPieceType = 'R'
+		elif pieceType == "knight":
+			myPieceType = 'T'
+		elif pieceType == "bishop":
+			myPieceType = 'B'
+		elif pieceType == "pawn":
+			myPieceType = 'P'
+
+		piecePositions = []
+		for row in range(8):
+			for col in range(8):
+				piece = board[row][col]
+				if myColor in piece and myPieceType in piece:
+					# piecePositions.append((row,col))
+					return (row, col)	
+		return (-1, -1) # When piece is not on a board return this tuple
 		
 #class Off_Enemy(EnemyOffense):
 	#HERE WE READ THE INPUT OF PLAYER X TEXT FILE
