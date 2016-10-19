@@ -197,13 +197,21 @@ class PythonChessMain:
 			self.Gui.PrintMessage("-----%s-----" % baseMsg)
 			self.Gui.Draw(board)
 			if self.Rules.IsInCheck(board,currentColor):
-				self.Gui.PrintMessage("Warning..."+self.player[currentPlayerIndex].GetName()+" ("+self.player[currentPlayerIndex].GetColor()+") is in check!") 
+				self.Gui.PrintMessage("Warning..."+self.player[currentPlayerIndex].GetName()+" ("+self.player[currentPlayerIndex].GetColor()+") is in check!")
+                                if currentColor == "white":    
+                                        currentPlayer = "X"
+                                elif currentColor == "black":
+                                        currentPlayer = "Y" 
 			if self.player[currentPlayerIndex].GetType() == 'HeuristicDefense':
 			#	then get new move to put into MoveTuple and make move
 			#	write to text file player_ytext below before changing currentPlayerIndex below
 			elif self.player[currentPlayerIndex].GetType() == 'HeuristicOffense':
 			#	then get new move to put into Movetuple and make move
 			#	write to text file player_xtext below before changing currentPlayerIndex below
+                                
+                                fileName = "log_" + currentPlayer + ".txt"
+                                file = open(fileName, "w")
+                                
 			elif self.player[currentPlayerIndex].GetType() == 'EnemyDefense'
 				#CALL READ FUNCTION HERE FOR ENEMY PLAYER == DEFENSE KRUTIK
 				#moveTuple = defense read function
