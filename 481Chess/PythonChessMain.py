@@ -3,10 +3,10 @@
  Project: Python Chess
  File name: PythonChessMain.py
  Description:  Chess for player vs. player, player vs. AI, or AI vs. AI.
-        Uses Tkinter to get initial game parameters.  Uses Pygame to draw the 
-        board and pieces and to get user mouse clicks.  Run with the "-h" option 
-        to get full listing of available command line flags.  
-        
+	Uses Tkinter to get initial game parameters.  Uses Pygame to draw the 
+	board and pieces and to get user mouse clicks.  Run with the "-h" option 
+	to get full listing of available command line flags.  
+	
  Copyright (C) 2009 Steve Osborne, srosborne (at) gmail.com
  http://yakinikuman.wordpress.com/
  *******
@@ -63,7 +63,7 @@
 """
 
 from ChessBoard import ChessBoard
-from ChessAI import HeuristicDefense, HeuristicOffense, Off_Heuristic, Def_Heuristic, EnemyDefense, EnemyOffense, Def_Enemy, Off_Enemy
+from ChessAI import HeuristicDefense, Def_Heuristic#, HeuristicOffense, Off_Heuristic, EnemyDefense, EnemyOffense, Def_Enemy, Off_Enemy
 from ChessPlayer import ChessPlayer
 from ChessGUI_text import ChessGUI_text
 from ChessGUI_pygame import ChessGUI_pygame
@@ -76,68 +76,68 @@ import copy
 
 #Node for state tree, used to build the state tree
 class Tree(object):
-        def __init__(self, board):
-                assert isinstance(board,ChessBoard)
-                self.board = copy.deepcopy(board) #stores copy of the ChessBoard
-                self.hVal = 0 #heuristic value
-                self.children = [] #Stores "tree objects," which are the nodes
-                
-        def add_child(self, node):
-                assert isinstance(node,Tree) #Checks if the node object is of class Tree
-                self.children.append(node)
-                
-        def create_tree(self,color,rules,ply):
-                if ply == 0:
-                        return ply
-                board = self.board.GetState() #Gets the current state of chess board
-                if color == 'white':
-                        player = 'w'
-                if color == 'black':
-                        player = 'b'
-                for r in range(8):
-                        for c in range(8):
-                                if board[r][c] != 'e':
-                                        piece = board[r][c]
-                                        if piece[:1] == player: #If the piece is the current play's piece, create the children of this node
-                                                tup = (r,c) #Gets position of piece
-                                                mylist = rules.GetListOfValidMoves(board,color,tup) #Gets list of valid move for that piece
-                                                #This loops through the list of valid moves and makes the move on a temporary ChessBoard.
-                                                #Uses the temporary ChessBoard to create a child, and then appends the child to the children list.
-                                                #Each child contains the state of the board after a valid move has been made.
-                                                for moves in mylist:
-                                                        tempChessBoard = copy.deepcopy(self.board)
-                                                        tempChessBoard.MovePiece((tup,moves))
-                                                        tempTreeObj = Tree(tempChessBoard)
-                                                        self.add_child(tempTreeObj)
-                                                        for child in self.children:
-                                                                if player == 'b':
-                                                                        color = 'white'
-                                                                elif player == 'w':
-                                                                        color = 'black'
-                                                        child.create_tree(color,rules,ply-1)                                                
+	def __init__(self, board):
+		assert isinstance(board,ChessBoard)
+		self.board = copy.deepcopy(board) #stores copy of the ChessBoard
+		self.hVal = 0 #heuristic value
+		self.children = [] #Stores "tree objects," which are the nodes
+		
+	def add_child(self, node):
+		assert isinstance(node,Tree) #Checks if the node object is of class Tree
+		self.children.append(node)
+		
+	def create_tree(self,color,rules,ply):
+		if ply == 0:
+			return ply
+		board = self.board.GetState() #Gets the current state of chess board
+		if color == 'white':
+			player = 'w'
+		if color == 'black':
+			player = 'b'
+		for r in range(8):
+			for c in range(8):
+				if board[r][c] != 'e':
+					piece = board[r][c]
+					if piece[:1] == player: #If the piece is the current play's piece, create the children of this node
+						tup = (r,c) #Gets position of piece
+						mylist = rules.GetListOfValidMoves(board,color,tup) #Gets list of valid move for that piece
+						#This loops through the list of valid moves and makes the move on a temporary ChessBoard.
+						#Uses the temporary ChessBoard to create a child, and then appends the child to the children list.
+						#Each child contains the state of the board after a valid move has been made.
+						for moves in mylist:
+							tempChessBoard = copy.deepcopy(self.board)
+							tempChessBoard.MovePiece((tup,moves))
+							tempTreeObj = Tree(tempChessBoard)
+							self.add_child(tempTreeObj)
+							for child in self.children:
+								if player == 'b':
+									color = 'white'
+								elif player == 'w':
+									color = 'black'
+							child.create_tree(color,rules,ply-1)                                                
 class PythonChessMain:
-        def __init__(self,options):
-                if options.debug:
-                        self.Board = ChessBoard(2)
-                        self.debugMode = True
-                else:
-                        self.Board = ChessBoard(0)#0 for normal board setup; see ChessBoard class for other options (for testing purposes)
-                        self.debugMode = False
+	def __init__(self,options):
+		if options.debug:
+			self.Board = ChessBoard(2)
+			self.debugMode = True
+		else:
+			self.Board = ChessBoard(0)#0 for normal board setup; see ChessBoard class for other options (for testing purposes)
+			self.debugMode = False
 
-                self.Rules = ChessRules()
-                
-        def SetUp(self,options):
-                #gameSetupParams: Player 1 and 2 Name, Color, Human/AI level
-                if self.debugMode:
-                        player1Name = 'Kasparov'
-                        player1Type = 'human'
-                        player1Color = 'white'
-                        player2Name = 'Light Blue'
-                        player2Type = 'randomAI'
-                        player2Color = 'black'          
-                else:
-                        GameParams = TkinterGameSetupParams()
-                        (player1Name, player1Color, player1Type, player2Name, player2Color, player2Type) = GameParams.GetGameSetupParams()
+		self.Rules = ChessRules()
+		
+	def SetUp(self,options):
+		#gameSetupParams: Player 1 and 2 Name, Color, Human/AI level
+		if self.debugMode:
+			player1Name = 'Kasparov'
+			player1Type = 'human'
+			player1Color = 'white'
+			player2Name = 'Light Blue'
+			player2Type = 'randomAI'
+			player2Color = 'black'          
+		else:
+			GameParams = TkinterGameSetupParams()
+			(player1Name, player1Color, player1Type, player2Name, player2Color, player2Type) = GameParams.GetGameSetupParams()
 		
 		self.player = [0,0]
 		if player1Type == 'human':
@@ -154,7 +154,7 @@ class PythonChessMain:
 		elif player2Type == 'randomAI':
 			self.player[1] = ChessAI_random(player2Name,player2Color)
 		elif player2Type == 'HeuristicDefense':
-			self.player[1] = Def_Heuristic(player2Name,player2Color)
+			self.player[1] = Def_Heuristic(player2Name,player2Color, self.Board)
 		elif player2Type == 'EnemyDefense':
 			self.player[1] = Def_Enemy(player2Name,player2Color)
 			
@@ -200,16 +200,18 @@ class PythonChessMain:
 				self.Gui.PrintMessage("Warning..."+self.player[currentPlayerIndex].GetName()+" ("+self.player[currentPlayerIndex].GetColor()+") is in check!") 
 			if self.player[currentPlayerIndex].GetType() == 'HeuristicDefense':
 			#	then get new move to put into MoveTuple and make move
+				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor)
 			#	write to text file player_ytext below before changing currentPlayerIndex below
-			elif self.player[currentPlayerIndex].GetType() == 'HeuristicOffense':
-			#	then get new move to put into Movetuple and make move
-			#	write to text file player_xtext below before changing currentPlayerIndex below
-			elif self.player[currentPlayerIndex].GetType() == 'EnemyDefense'
-				#CALL READ FUNCTION HERE FOR ENEMY PLAYER == DEFENSE KRUTIK
-				#moveTuple = defense read function
-			elif self.player[currentPlayerIndex].GetType() == 'EnemyOffense'
-				#CALL READ FUNCTION HERE FOR ENEMY PLAYER == OFFENSE KRUTIK
-				#moveTuple = offense read function
+
+			# elif self.player[currentPlayerIndex].GetType() == 'HeuristicOffense':
+			# #	then get new move to put into Movetuple and make move
+			# #	write to text file player_xtext below before changing currentPlayerIndex below
+			# elif self.player[currentPlayerIndex].GetType() == 'EnemyDefense'
+			# 	#CALL READ FUNCTION HERE FOR ENEMY PLAYER == DEFENSE KRUTIK
+			# 	#moveTuple = defense read function
+			# elif self.player[currentPlayerIndex].GetType() == 'EnemyOffense'
+			# 	#CALL READ FUNCTION HERE FOR ENEMY PLAYER == OFFENSE KRUTIK
+			# 	#moveTuple = offense read function
 			else:
 				moveTuple = self.Gui.GetPlayerInput(board,currentColor)
 			moveReport = self.Board.MovePiece(moveTuple) #moveReport = string like "White Bishop moves from A1 to C3" (+) "and captures ___!"
@@ -228,13 +230,13 @@ class PythonChessMain:
 
 parser = OptionParser()
 parser.add_option("-d", dest="debug",
-                                  action="store_true", default=False, help="Enable debug mode (different starting board configuration)")
+				  action="store_true", default=False, help="Enable debug mode (different starting board configuration)")
 parser.add_option("-t", dest="text",
-                                  action="store_true", default=False, help="Use text-based GUI")
+				  action="store_true", default=False, help="Use text-based GUI")
 parser.add_option("-o", dest="old",
-                                  action="store_true", default=False, help="Use old graphics in pygame GUI")
+				  action="store_true", default=False, help="Use old graphics in pygame GUI")
 parser.add_option("-p", dest="pauseSeconds", metavar="SECONDS",
-                                  action="store", default=0, help="Sets time to pause between moves in AI vs. AI games (default = 0)")
+				  action="store", default=0, help="Sets time to pause between moves in AI vs. AI games (default = 0)")
 
 
 (options,args) = parser.parse_args()
@@ -244,4 +246,4 @@ game.SetUp(options)
 game.MainLoop()
 
 
-        
+	

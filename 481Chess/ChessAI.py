@@ -7,50 +7,54 @@
  Copyright (C) 2009 Steve Osborne, srosborne (at) gmail.com
  http://yakinikuman.wordpress.com/
  """
- 
+
+from ChessBoard import ChessBoard
 from ChessRules import ChessRules
 import random
+import copy
 
 class Tree(object):
-        def __init__(self, board):
-                assert isinstance(board,ChessBoard)
-                self.board = copy.deepcopy(board) #stores copy of the ChessBoard
-                self.hVal = 0 #heuristic value
-                self.children = [] #Stores "tree objects," which are the nodes
-                
-        def add_child(self, node):
-                assert isinstance(node,Tree) #Checks if the node object is of class Tree
-                self.children.append(node)
-                
-        def create_tree(self,color,rules,ply):
-                if ply == 0:
-                        return ply
-                board = self.board.GetState() #Gets the current state of chess board
-                if color == 'white':
-                        player = 'w'
-                if color == 'black':
-                        player = 'b'
-                for r in range(8):
-                        for c in range(8):
-                                if board[r][c] != 'e':
-                                        piece = board[r][c]
-                                        if piece[:1] == player: #If the piece is the current play's piece, create the children of this node
-                                                tup = (r,c) #Gets position of piece
-                                                mylist = rules.GetListOfValidMoves(board,color,tup) #Gets list of valid move for that piece
-                                                #This loops through the list of valid moves and makes the move on a temporary ChessBoard.
-                                                #Uses the temporary ChessBoard to create a child, and then appends the child to the children list.
-                                                #Each child contains the state of the board after a valid move has been made.
-                                                for moves in mylist:
-                                                        tempChessBoard = copy.deepcopy(self.board)
-                                                        tempChessBoard.MovePiece((tup,moves))
-                                                        tempTreeObj = Tree(tempChessBoard)
-                                                        self.add_child(tempTreeObj)
-                                                        for child in self.children:
-                                                                if player == 'b':
-                                                                        color = 'white'
-                                                                elif player == 'w':
-                                                                        color = 'black'
-                                                        child.create_tree(color,rules,ply-1)                                                        
+		def __init__(self, board):
+				assert isinstance(board,ChessBoard)
+				self.board = copy.deepcopy(board) #stores copy of the ChessBoard
+				self.hVal = 0 #heuristic value
+				self.children = [] #Stores "tree objects," which are the nodes
+				self.moveTuple = ((0,0), (0,0)) #Stores the move this node makes
+				
+		def add_child(self, node):
+				assert isinstance(node,Tree) #Checks if the node object is of class Tree
+				self.children.append(node)
+				
+		def create_tree(self,color,rules,ply):
+				if ply == 0:
+						return ply
+				board = self.board.GetState() #Gets the current state of chess board
+				if color == 'white':
+						player = 'w'
+				if color == 'black':
+						player = 'b'
+				for r in range(8):
+						for c in range(8):
+								if board[r][c] != 'e':
+										piece = board[r][c]
+										if piece[:1] == player: #If the piece is the current play's piece, create the children of this node
+												tup = (r,c) #Gets position of piece
+												mylist = rules.GetListOfValidMoves(board,color,tup) #Gets list of valid move for that piece
+												#This loops through the list of valid moves and makes the move on a temporary ChessBoard.
+												#Uses the temporary ChessBoard to create a child, and then appends the child to the children list.
+												#Each child contains the state of the board after a valid move has been made.
+												for moves in mylist:
+														tempChessBoard = copy.deepcopy(self.board)
+														tempChessBoard.MovePiece((tup, moves))
+														self.moveTuple = ((tup, moves))
+														tempTreeObj = Tree(tempChessBoard)
+														self.add_child(tempTreeObj)
+														for child in self.children:
+																if player == 'b':
+																		color = 'white'
+																elif player == 'w':
+																		color = 'black'
+														child.create_tree(color,rules,ply-1)                                                        
 
 #PROTOTYPE AI CLASS
 #class ChessAI:
@@ -245,20 +249,36 @@ class Off_Heuristic(HeuristicOffense):
 		
 class Def_Heuristic(HeuristicDefense):
 	#heuristically pick the best legal move
-	
+	def __init__(self, name, color, Board):
+		self.Board = Board
+		HeuristicDefense.__init__(self, name, color)
+
 	def GetMove(self,board,color):
 		#print "In ChessAI_random.GetMove"
 	
 		myPieces = self.GetMyPiecesWithLegalMoves(board,color)
-		opponentPieces = self.GetOpponentPieces(board, color)
+		# opponentPieces = self.GetOpponentPieces(board, color)
+		opponentPieces = self.GetEnemyPiecesWithLegalMoves(board, color)
 		
 		#THIS IS WHERE WE CREATE THE BOARD STATE MINI-MAX TREE
 		#WE THEN APPLY OUR HEURISTIC FUNCTION TO EVERY CHILD NODE AT THE BOTTOM OF THE TREE
 		#THEN RETURN THE HEURISTIC VALUES TO THE TOP RECURSIVELY
 		#THE MOVE THAT IS THE BEST CHOICE SHOULD BE SELECTED
 		#THAT MOVE TUPLE IS CREATED AND RETURN TO MAIN
+		tree = Tree(self.Board)
+
+		tree.create_tree(color, self.Rules, 1)
+
+		for minNode in tree.children:
+			minNode.hVal = self.DefenseHeuristicValue(minNode.board.GetState())
+			print minNode.hVal
+			# for maxNode in minNode.children:
+			# 	maxNode.hVal = self.DefenseHeuristicValue(maxNode.board.GetState())
+			# 	print maxNode.hVal
 		
-		moveTuple = (myFromTuple,myToTuple)
+		
+		# moveTuple = (myFromTuple,myToTuple)
+		moveTuple = ((0,2), (1,1))
 		return moveTuple
 		
 	def GetMyPiecesWithLegalMoves(self,board,color):
@@ -279,6 +299,29 @@ class Def_Heuristic(HeuristicDefense):
 					if len(self.Rules.GetListOfValidMoves(board,color,(row,col))) > 0:
 						myPieces.append((row,col))	
 		return myPieces
+
+	def GetEnemyPiecesWithLegalMoves(self,board,color):
+		#print "In GetEnemyPiecesWithLegalMoves"
+
+		if color == "black":
+			myColor = 'b'
+			enemyColor = 'w'
+			enemyColor_full = 'white'
+		else:
+			myColor = 'w'
+			enemyColor = 'b'
+			enemyColor_full = 'black'
+
+		#get list of opponent pieces that have legal moves
+		enemyPieces = []
+
+		for row in range(8):
+			for col in range(8):
+				piece = board[row][col]
+				if enemyColor in piece:
+					if len(self.Rules.GetListOfValidMoves(board,enemyColor_full,(row,col))) > 0:
+						enemyPieces.append((row,col))
+		return enemyPieces
 		
 	def PiecePositions(self,board,color,pieceType):
 		#returns list of piece positions; will be empty if color piece doesn't exist on board
@@ -305,15 +348,16 @@ class Def_Heuristic(HeuristicDefense):
 			for col in range(8):
 				piece = board[row][col]
 				if myColor in piece and myPieceType in piece:
-					piecePositions.append((row,col))	
-		return piecePositions
+					# piecePositions.append((row,col))
+					return (row, col)	
+		return (-1, -1) # When piece is not on a board return this tuple
 		
-	def DefenseHeuristicValue(board):
-		blackKnight = PiecePositions(self, board, black, knight)
-		blackKing = PiecePositions(self, board, black, king)
-		whiteKnight = PiecePositions(self, board, white, knight)
-		whiteKing = PiecePositions(self, board, white, king)
-		whiteRook = PiecePositions(self, board, white, rook)
+	def DefenseHeuristicValue(self, board):
+		blackKnight = self.PiecePositions(board, "black", "knight")
+		blackKing = self.PiecePositions(board, "black", "king")
+		whiteKnight = self.PiecePositions(board, "white", "knight")
+		whiteKing = self.PiecePositions(board, "white", "king")
+		whiteRook = self.PiecePositions(board, "white", "rook")
 		
 		knightDistance = abs(blackKing[0] - whiteKnight[0]) + abs(blackKing[1] - whiteKnight[1]) - 3
 		kingDistance = abs(blackKing[0] - whiteKing[0]) + abs(blackKing[1] - whiteKing[1]) - 2
@@ -327,13 +371,13 @@ class Def_Heuristic(HeuristicDefense):
 		fromKingDistance = knightDistance + kingDistance + rookDistance
 		
 		if bkKnightDistance == 0:
-			toKingDistance = 50
+			fromKingDistance = 50
 			
 		if bkKingDistance == 0:
-			toKingDistance = 50
+			fromKingDistance = 50
 			
 		if bkRookDistance == 0:
-			toKingDistance = 50
+			fromKingDistance = 50
 		
 		if knightDistance == -3:
 			fromKingDistance = -20
