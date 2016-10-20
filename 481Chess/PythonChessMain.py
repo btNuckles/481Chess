@@ -63,7 +63,7 @@
 """
 
 from ChessBoard import ChessBoard
-from ChessAI import HeuristicDefense, Def_Heuristic, HeuristicOffense, Off_Heuristic#, EnemyDefense, EnemyOffense, Def_Enemy, Off_Enemy
+from ChessAI import HeuristicDefense, Def_Heuristic, HeuristicOffense, Off_Heuristic, EnemyDefense, Def_Enemy, EnemyOffense, Off_Enemy
 from ChessPlayer import ChessPlayer
 from ChessGUI_text import ChessGUI_text
 from ChessGUI_pygame import ChessGUI_pygame
@@ -147,7 +147,7 @@ class PythonChessMain:
 		elif player1Type == 'HeuristicOffense':
 			self.player[0] = Off_Heuristic(player1Name,player1Color, self.Board)
 		elif player1Type == 'EnemyOffense':
-			self.player[0] = Off_Enemy(player1Name,player1Color)
+			self.player[0] = Off_Enemy(player1Name,player1Color, self.Board)
 			
 		if player2Type == 'human':
 			self.player[1] = ChessPlayer(player2Name,player2Color)
@@ -156,7 +156,7 @@ class PythonChessMain:
 		elif player2Type == 'HeuristicDefense':
 			self.player[1] = Def_Heuristic(player2Name,player2Color, self.Board)
 		elif player2Type == 'EnemyDefense':
-			self.player[1] = Def_Enemy(player2Name,player2Color)
+			self.player[1] = Def_Enemy(player2Name,player2Color, self.Board)
 			
 		if 'AI' in self.player[0].GetType() and 'AI' in self.player[1].GetType():
 			self.AIvsAI = True
@@ -185,15 +185,21 @@ class PythonChessMain:
 		turnCount = 0
 		open("log_X.txt", "w").close()
 		open("log_Y.txt", "w").close()
+		prevBoards = []  #To compare previous boards
 		while not self.Rules.IsCheckmate(self.Board.GetState(),self.player[currentPlayerIndex].color):
 			board = self.Board.GetState()
 			currentColor = self.player[currentPlayerIndex].GetColor()
 			#hardcoded so that player 1 is always white
-			if currentColor == 'white':
-				turnCount = turnCount + 1
+			turnCount = turnCount + 1
 			if turnCount == 101:
 				self.Gui.PrintMessage("Maximum moves reached.")
 				self.Gui.EndGame(board)
+			if currentColor == 'black':  #Only the defense player wants a draw
+				#print prevBoards.count(board)
+				if prevBoards.count(board) == 2:
+					self.Gui.PrintMessage("Black player calls threefold repetition draw.")
+					self.Gui.EndGame(board)
+				prevBoards.append(copy.deepcopy(board))
 			self.Gui.PrintMessage("")
 			baseMsg = "TURN %s - %s (%s)" % (str(turnCount),self.player[currentPlayerIndex].GetName(),currentColor)
 			self.Gui.PrintMessage("-----%s-----" % baseMsg)
@@ -205,21 +211,43 @@ class PythonChessMain:
 			if self.Rules.IsInCheck(board,currentColor):
 				self.Gui.PrintMessage("Warning..."+self.player[currentPlayerIndex].GetName()+" ("+self.player[currentPlayerIndex].GetColor()+") is in check!") 
 			if self.player[currentPlayerIndex].GetType() == 'HeuristicDefense':
-			#	then get new move to put into MoveTuple and make move
-				currentPlayer = "Y"
+			#	then get new move to put into MoveTuple and make move			
+				
+				if turnCount > 2:
+					textFileX = open("log_X.txt", "r")
+					for line in textFileX:
+						move = line	
+					textFileY = open("log_Y.txt", "a")
+					textFileY.write(move)
+					textFileY.close()
+					textFileX.close()
 				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor)
 				self.WriteMove(board, moveTuple, currentPlayer, turnCount)
+				currentPlayer = "Y"
+				
 			#	write to text file player_ytext below before changing currentPlayerIndex below
 			elif self.player[currentPlayerIndex].GetType() == 'HeuristicOffense':
 				currentPlayer = "X"
+				
+				if turnCount > 1:
+					textFileY = open("log_Y.txt", "r")
+					for line in textFileY:
+						move = line
+					textFileX = open("log_X.txt", "a")
+					textFileX.write(move)
+					textFileX.close()
+					textFileY.close()
 				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor)
 				self.WriteMove(board, moveTuple, currentPlayer, turnCount)
+				
 			# #	then get new move to put into Movetuple and make move
 			# #	write to text file player_xtext below before changing currentPlayerIndex below
-			# elif self.player[currentPlayerIndex].GetType() == 'EnemyDefense'
+			elif self.player[currentPlayerIndex].GetType() == 'EnemyDefense':
+				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor)
 			# 	#CALL READ FUNCTION HERE FOR ENEMY PLAYER == DEFENSE KRUTIK
 			# 	#moveTuple = defense read function
-			# elif self.player[currentPlayerIndex].GetType() == 'EnemyOffense'
+			elif self.player[currentPlayerIndex].GetType() == 'EnemyOffense':
+				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor)
 			# 	#CALL READ FUNCTION HERE FOR ENEMY PLAYER == OFFENSE KRUTIK
 			# 	#moveTuple = offense read function
 			else:
@@ -230,6 +258,7 @@ class PythonChessMain:
 			#	index = 0 is player x / "white" / offense
 			#	index = 1 is player y / "black" / defense
 			currentPlayerIndex = (currentPlayerIndex+1)%2 #this will cause the currentPlayerIndex to toggle between 1 and 0
+			self.AIvsAI = True
 			if self.AIvsAI and self.AIpause:
 				time.sleep(self.AIpauseSeconds)
 		self.Gui.PrintMessage("CHECKMATE!")
@@ -267,6 +296,11 @@ class PythonChessMain:
 		file = open(fileName, "a")
 		file.write(str(turnCount) + " " + currentPlayer + ":" + pieceToMove[1] + ":" + columnLetter + str(tuple[1][0] + 1) + "\n")
 		file.close()
+		
+		if turnCount == 1:
+			fileName = open("log_Y.txt", "w")
+			fileName.write(str(turnCount) + " " + currentPlayer + ":" + pieceToMove[1] + ":" + columnLetter + str(tuple[1][0] + 1) + "\n")
+			fileName.close()
 			
 			
 

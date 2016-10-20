@@ -181,7 +181,7 @@ class Off_Heuristic(HeuristicOffense):
 		
 		
 		# moveTuple = (myFromTuple,myToTuple)
-		print(moveTuple)
+		#print(moveTuple)
 		return moveTuple
 		
 	def GetMyPiecesWithLegalMoves(self,board,color):
@@ -334,13 +334,13 @@ class Def_Heuristic(HeuristicDefense):
 		#for minNode in tree.children:
 		#	minNode.hVal = self.DefenseHeuristicValue(minNode.board.GetState())
 		#	print minNode.hVal
-			# for maxNode in minNode.children:
-			# 	maxNode.hVal = self.DefenseHeuristicValue(maxNode.board.GetState())
-			# 	print maxNode.hVal
+		# for maxNode in minNode.children:
+		# 	maxNode.hVal = self.DefenseHeuristicValue(maxNode.board.GetState())
+		# 	print maxNode.hVal
 		
 		
 		# moveTuple = (myFromTuple,myToTuple)
-		print(moveTuple)
+		#print(moveTuple)
 		return moveTuple
 		
 	def GetMyPiecesWithLegalMoves(self,board,color):
@@ -474,20 +474,226 @@ class Def_Heuristic(HeuristicDefense):
 				
 			
 		
-#class Def_Enemy(EnemyDefense):
+class Def_Enemy(EnemyDefense):
 	#HERE WE READ THE INPUT OF PLAYER Y TEXT FILE
 	#WE USE THIS CLASS WHEN THE OPPONENT GROUP IS ON DEFENSE AND WE ARE ON OFFENSE
 	#READ FROM THE TEXT FILE THEN CONVERT TO THE FORMAT OF MOVETUPLE
 	#USE THIS MOVE TUPLE TO USE THE MAKEMOVE FUNCTION IN MAIN FOR CURRENT PLAYER TYPE
 	#THIS IS FOR THE SAKE OF UPDATING OUR OWN BOARD SO WE CAN MAKE OUR NEXT MOVE
+	def __init__(self, name, color, Board):
+		self.Board = Board
+		EnemyDefense.__init__(self, name, color)
 		
-#class Off_Enemy(EnemyOffense):
+	def GetMove(self, board, color):
+		#myPieces = self.GetMyPiecesWithLegalMoves(board,color)
+		
+		defenseMoveNotMade = True
+		while defenseMoveNotMade:
+			textFile = open("log_Y.txt")
+			for line in textFile:
+				pass
+			
+			line = line.split(" ")
+			if line[1][0] == "Y":
+				#offenseMoveMade == False
+				token = line[1].split(':')
+				pieceType = token[1]
+				locationToMove = token[2]
+				break
+			textFile.close()
+			print("Waiting for defenses move")
+			
+		#print(pieceType)
+		#print(locationToMove)
+			
+			
+			
 
+		mypiecePosition = self.PiecePositions(board, color, pieceType[0])
+		#print(mypiecePosition)
+		if locationToMove[0] == 'a':
+			columnNum = 0
+		elif locationToMove[0] == 'b':
+			columnNum = 1
+		elif locationToMove[0] == 'c':
+			columnNum = 2
+		elif locationToMove[0] == 'd':
+			columnNum = 3
+		elif locationToMove[0] == 'e':
+			columnNum = 4
+		elif locationToMove[0] == 'f':
+			columnNum = 5
+		elif locationToMove[0] == 'g':
+			columnNum = 6
+		elif locationToMove[0] == 'h':
+			columnNum = 7
+			
+		rowNum = locationToMove[1]		
+		
+		r, c = 2, 2 
+		moveTuple = [[0 for x in range(r)] for y in range(c)] 
+		
+		moveTuple[0][0] = mypiecePosition[0]
+		moveTuple[0][1] = mypiecePosition[1]
+		moveTuple[1][0] = int(rowNum)
+		moveTuple[1][1] = columnNum
+		#moveTuple = ((rowNum,columnNum),((mypiecePosition[0]),(mypiecePosition[1])))
+		print moveTuple
+		return moveTuple
+		
+	def PiecePositions(self,board,color,pieceType):
+		#returns list of piece positions; will be empty if color piece doesn't exist on board
+		if color == "black":
+			myColor = 'b'
+		else:
+			myColor = 'w'
+			
+		if pieceType == "K":
+			myPieceType = 'K'
+		elif pieceType == "R":
+			myPieceType = 'R'
+		elif pieceType == "T":
+			myPieceType = 'T'
+
+
+		piecePositions = []
+		for row in range(8):
+			for col in range(8):
+				piece = board[row][col]
+				if myColor in piece and myPieceType in piece:
+					# piecePositions.append((row,col))
+					return (row, col)	
+		return (-1, -1) # When piece is not on a board return this tuple
+		
+	def GetMyPiecesWithLegalMoves(self,board,color):
+		#print "In ChessAI_random.GetMyPiecesWithLegalMoves"
+		if color == "black":
+			myColor = 'b'
+			enemyColor = 'w'
+		else:
+			myColor = 'w'
+			enemyColor = 'b'
+			
+		#get list of my pieces
+		myPieces = []
+		for row in range(8):
+			for col in range(8):
+				piece = board[row][col]
+				if myColor in piece:
+					if len(self.Rules.GetListOfValidMoves(board,color,(row,col))) > 0:
+						myPieces.append((row,col))	
+		return myPieces
+
+		
+class Off_Enemy(EnemyOffense):
+	def __init__(self, name, color, Board):
+		self.Board = Board
+		EnemyOffense.__init__(self, name, color)
 	
 	#HERE WE READ THE INPUT OF PLAYER X TEXT FILE
 	#WE USE THIS CLASS WHEN THE OPPONENT GROUP IS ON OFFENSE AND WE ARE ON DEFENSE
 	#READ FROM THE TEXT FILE THEN CONVERT TO THE FORMAT OF MOVETUPLE
 	#USE THIS MOVE TUPLE TO USE THE MAKEMOVE FUNCTION IN MAIN FOR CURRENT PLAYER TYPE
 	#THIS IS FOR THE SAKE OF UPDATING OUR OWN BOARD SO WE CAN MAKE OUR NEXT MOVE
+	
+	def GetMove(self, board, color):	
+		
+		offenseMoveNotMade = True
+		while offenseMoveNotMade is True:
+			textFile = open("test.txt")
+			for line in textFile:
+				pass
+			line = line.split(" ")
+			if line[1][0] == "X":
+			#offenseMoveMade == False
+				token = line[1].split(':')
+				pieceType = token[1]
+				locationToMove = token[2]
+				break
+			textFile.close()
+			print("Waiting for defenses move")
+			
+		#print(pieceType)
+		#print(locationToMove)
+			
+			
+			
+
+		mypiecePosition = self.PiecePositions(board, color, pieceType[0])
+		#print(mypiecePosition)
+		if locationToMove[0] == 'a':
+			columnNum = 0
+		elif locationToMove[0] == 'b':
+			columnNum = 1
+		elif locationToMove[0] == 'c':
+			columnNum = 2
+		elif locationToMove[0] == 'd':
+			columnNum = 3
+		elif locationToMove[0] == 'e':
+			columnNum = 4
+		elif locationToMove[0] == 'f':
+			columnNum = 5
+		elif locationToMove[0] == 'g':
+			columnNum = 6
+		elif locationToMove[0] == 'h':
+			columnNum = 7
+			
+		rowNum = locationToMove[1]		
+		
+		r, c = 2, 2 
+		moveTuple = [[0 for x in range(r)] for y in range(c)] 
+		
+		moveTuple[0][0] = mypiecePosition[0]
+		moveTuple[0][1] = mypiecePosition[1]
+		moveTuple[1][0] = int(rowNum)
+		moveTuple[1][1] = columnNum
+		#moveTuple = ((rowNum,columnNum),((mypiecePosition[0]),(mypiecePosition[1])))
+		print moveTuple
+		return moveTuple
+	
+	def PiecePositions(self,board,color,pieceType):
+		#returns list of piece positions; will be empty if color piece doesn't exist on board
+		if color == "black":
+			myColor = 'b'
+		else:
+			myColor = 'w'
+			
+		if pieceType == "K":
+			myPieceType = 'K'
+		elif pieceType == "R":
+			myPieceType = 'R'
+		elif pieceType == "T":
+			myPieceType = 'T'
+
+
+		piecePositions = []
+		for row in range(8):
+			for col in range(8):
+				piece = board[row][col]
+				if myColor in piece and myPieceType in piece:
+					# piecePositions.append((row,col))
+					return (row, col)	
+		return (-1, -1) # When piece is not on a board return this tuple
+		
+	def GetMyPiecesWithLegalMoves(self,board,color):
+		#print "In ChessAI_random.GetMyPiecesWithLegalMoves"
+		if color == "black":
+			myColor = 'b'
+			enemyColor = 'w'
+		else:
+			myColor = 'w'
+			enemyColor = 'b'
+			
+		#get list of my pieces
+		myPieces = []
+		for row in range(8):
+			for col in range(8):
+				piece = board[row][col]
+				if myColor in piece:
+					if len(self.Rules.GetListOfValidMoves(board,color,(row,col))) > 0:
+						myPieces.append((row,col))	
+		return myPieces
+	
+
 
 
