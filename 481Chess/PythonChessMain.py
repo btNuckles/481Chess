@@ -185,6 +185,7 @@ class PythonChessMain:
 		turnCount = 0
 		open("log_X.txt", "w").close()
 		open("log_Y.txt", "w").close()
+		prevBoards = []  #To compare previous boards
 		while not self.Rules.IsCheckmate(self.Board.GetState(),self.player[currentPlayerIndex].color):
 			board = self.Board.GetState()
 			currentColor = self.player[currentPlayerIndex].GetColor()
@@ -194,6 +195,12 @@ class PythonChessMain:
 			if turnCount == 101:
 				self.Gui.PrintMessage("Maximum moves reached.")
 				self.Gui.EndGame(board)
+			if currentColor == 'black':  #Only the defense player wants a draw
+				#print prevBoards.count(board)
+				if prevBoards.count(board) == 2:
+					self.Gui.PrintMessage("Black player calls threefold repetition draw.")
+					self.Gui.EndGame(board)
+				prevBoards.append(copy.deepcopy(board))
 			self.Gui.PrintMessage("")
 			baseMsg = "TURN %s - %s (%s)" % (str(turnCount),self.player[currentPlayerIndex].GetName(),currentColor)
 			self.Gui.PrintMessage("-----%s-----" % baseMsg)
