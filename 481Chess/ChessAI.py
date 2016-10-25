@@ -14,48 +14,48 @@ import random
 import copy
 
 class Tree(object):
-		def __init__(self, board):
-				assert isinstance(board,ChessBoard)
-				self.board = copy.deepcopy(board) #stores copy of the ChessBoard
-				self.hVal = 0 #heuristic value
-				self.children = [] #Stores "tree objects," which are the nodes
-				self.moveTuple = ((0,0), (0,0)) #Stores the move this node makes
-				
-		def add_child(self, node):
-				assert isinstance(node,Tree) #Checks if the node object is of class Tree
-				self.children.append(node)
-				
-		def create_tree(self,color,rules,ply):
-				if ply == 0:
-						return ply
-				board = self.board.GetState() #Gets the current state of chess board
-				if color == 'white':
-						player = 'w'
-				if color == 'black':
-						player = 'b'
-				for r in range(8):
-						for c in range(8):
-								if board[r][c] != 'e':
-										piece = board[r][c]
-										if piece[:1] == player: #If the piece is the current play's piece, create the children of this node
-												tup = (r,c) #Gets position of piece
-												mylist = rules.GetListOfValidMoves(board,color,tup) #Gets list of valid move for that piece
-												#This loops through the list of valid moves and makes the move on a temporary ChessBoard.
-												#Uses the temporary ChessBoard to create a child, and then appends the child to the children list.
-												#Each child contains the state of the board after a valid move has been made.
-												for moves in mylist:
-														tempChessBoard = copy.deepcopy(self.board)
-														tempChessBoard.MovePiece((tup, moves))
-														#print(tup, moves)
-														tempTreeObj = Tree(tempChessBoard)
-														tempTreeObj.moveTuple = ((tup, moves))
-														self.add_child(tempTreeObj)
-														for child in self.children:
-																if player == 'b':
-																		color = 'white'
-																elif player == 'w':
-																		color = 'black'
-														child.create_tree(color,rules,ply-1)                                                        
+	def __init__(self, board):
+		assert isinstance(board,ChessBoard)
+		self.board = copy.deepcopy(board) #stores copy of the ChessBoard
+		self.hVal = 0 #heuristic value
+		self.children = [] #Stores "tree objects," which are the nodes
+		self.moveTuple = ((0,0), (0,0)) #Stores the move this node makes
+		
+	def add_child(self, node):
+		assert isinstance(node,Tree) #Checks if the node object is of class Tree
+		self.children.append(node)
+		
+	def create_tree(self,color,rules,ply):
+		if ply == 0:
+			return ply
+		board = self.board.GetState() #Gets the current state of chess board
+		if color == 'white':
+			player = 'w'
+		if color == 'black':
+			player = 'b'
+		for r in range(8):
+			for c in range(8):
+				if board[r][c] != 'e':
+					piece = board[r][c]
+					if piece[:1] == player: #If the piece is the current play's piece, create the children of this node
+						tup = (r,c) #Gets position of piece
+						mylist = rules.GetListOfValidMoves(board,color,tup) #Gets list of valid move for that piece
+						#This loops through the list of valid moves and makes the move on a temporary ChessBoard.
+						#Uses the temporary ChessBoard to create a child, and then appends the child to the children list.
+						#Each child contains the state of the board after a valid move has been made.
+						for moves in mylist:
+							tempChessBoard = copy.deepcopy(self.board)
+							tempChessBoard.MovePiece((tup, moves))
+							#print(tup, moves)
+							tempTreeObj = Tree(tempChessBoard)
+							tempTreeObj.moveTuple = ((tup, moves))
+							self.add_child(tempTreeObj)
+							for child in self.children:
+								if player == 'b':
+									color = 'white'
+								elif player == 'w':
+									color = 'black'
+							child.create_tree(color,rules,ply-1)                                                        
 
 #PROTOTYPE AI CLASS
 #class ChessAI:
@@ -240,6 +240,59 @@ class Off_Heuristic(HeuristicOffense):
 		blackKing = self.PiecePositions(board, "black", "king")
 		blackKnight = self.PiecePositions(board, "black", "knight")
 		
+		retval = 0
+		
+		# Board value loses points for missing white rook or knight
+		if whiteKnight[0] == -1:
+			retval -= 10000
+			
+		if whiteRook[0] == -1:
+			retval -= 10000
+			
+		
+		# Gain points for taking enemy knight
+		if blackKnight[0] == -1:
+			retval += 10000
+			
+
+		# White king needs to be close to black king for checkmate, lower distance increases value
+		retval += 100 * (14 - (abs(whiteKing[0] - blackKing[0]) + abs(whiteKing[1] - blackKing[1])))
+
+		# Good to have knight close to black king to help put in check
+		if whiteKnight[0] != -1:
+			retval += 50 * (14 - (abs(whiteKnight[0] - blackKing[0]) + abs(whiteKnight[1] - blackKing[1])))
+		
+		# We want black king to be at edge
+		if blackKing[0] == 0 or blackKing[0] == 7\
+		   or blackKing[1] == 0 or blackKing[1] == 7:
+			retval += 1000
+			
+
+		# But don't want white king at edge, could allow black king to move to center
+		if whiteKing[0] == 0 or whiteKing[0] == 7\
+		   or whiteKing[1] == 0 or whiteKing[1] == 7:
+			retval -= 900
+			
+		
+		# Rook can make barrier to block black king from center. Good if +/- 1 row/col
+		if (whiteKing[0] > blackKing[0] and whiteRook[0] == (blackKing[0] + 1))\
+		   or (whiteKing[1] > blackKing[1] and whiteRook[1] == (blackKing[1] + 1))\
+		   or (whiteKing[0] < blackKing[0] and whiteRook[0] == (blackKing[0] - 1))\
+		   or (whiteKing[1] < blackKing[1] and whiteRook[1] == (blackKing[1] - 1)):
+			retval += 500
+			
+
+		# Checkmate conditions: black king at edge, kings 2 or 3 apart, rook on same edge as black king
+		if (blackKing[0] == 0 or blackKing[0] == 7 or blackKing[1] == 0 or blackKing[1] == 7) \
+		   and ((abs(whiteKing[0] - blackKing[0]) + abs(whiteKing[1] - blackKing[1])) == 2) \
+		   and ( (blackKing[0] == 0 and whiteRook[0] == 0) or (blackKing[0] == 7 and whiteRook[0] == 7)\
+			 or (blackKing[1] == 0 and whiteRook[1] == 0) or (blackKing[1] == 7 and whiteRook[1] == 7)):
+			retval += 100000
+			
+		print retval
+		return retval
+
+		"""
 		knightDistance = abs(whiteKnight[0] - blackKing[0]) + abs(whiteKnight[1] - blackKing[1]) - 4
 		kingDistance = abs(whiteKing[0] - blackKing[0]) + abs(whiteKing[1] - blackKing[1]) - 2
 		rookDistance = 1
@@ -277,6 +330,7 @@ class Off_Heuristic(HeuristicOffense):
 			toKingDistance = -20
 				
 		return toKingDistance
+		"""
 		
 	def MiniMax(self, tree, depth, playerIndex):
 		if depth == 0 or not tree.children:
