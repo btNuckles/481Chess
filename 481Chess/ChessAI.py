@@ -164,11 +164,11 @@ class Off_Heuristic(HeuristicOffense):
 		
 		self.MiniMax(tree, 3, playerIndex)
 		
-		temp = 64
+		temp = -50000
 		for child in tree.children:
 			#print(child.hVal)
 			#print(child.moveTuple)
-			if child.hVal < temp:
+			if child.hVal > temp:
 				temp = child.hVal
 				moveTuple = child.moveTuple
 					
@@ -289,7 +289,7 @@ class Off_Heuristic(HeuristicOffense):
 			 or (blackKing[1] == 0 and whiteRook[1] == 0) or (blackKing[1] == 7 and whiteRook[1] == 7)):
 			retval += 100000
 			
-		print retval
+		#print retval
 		return retval
 
 		"""
@@ -337,18 +337,19 @@ class Off_Heuristic(HeuristicOffense):
 			return self.OffenseHeuristicValue(tree.board.GetState())
 			
 		if playerIndex:	#CURRENT PLY == OFFENSE
-			bestValue = 64
+			bestValue = -100000
 			for child in tree.children:
-				temp = self.MiniMax(tree, depth - 1, True)
-				bestValue = min(bestValue, temp)
+				temp = self.MiniMax(child, depth - 1, True)
+				bestValue = max(bestValue, temp)
+				#print(bestValue)
 				tree.hVal = bestValue
 			return bestValue
 				
 		else:		#CURRENT PLY == DEFENSE
-			bestValue = -64
+			bestValue = 100000
 			for child in tree.children:
-				temp = self.MiniMax(tree, depth - 1, False)
-				bestValue = max(bestValue, temp)
+				temp = self.MiniMax(child, depth - 1, False)
+				bestValue = min(bestValue, temp)
 				tree.hVal = bestValue
 			return bestValue
 		
@@ -513,7 +514,7 @@ class Def_Heuristic(HeuristicDefense):
 		if playerIndex:	#CURRENT PLY == DEFENSE
 			bestValue = -64
 			for child in tree.children:
-				temp = self.MiniMax(tree, depth - 1, False)
+				temp = self.MiniMax(child, depth - 1, False)
 				bestValue = max(bestValue, temp)
 				tree.hVal = bestValue
 			return bestValue
@@ -521,7 +522,7 @@ class Def_Heuristic(HeuristicDefense):
 		else:		#CURRENT PLY == OFFENSE
 			bestValue = 64
 			for child in tree.children:
-				temp = self.MiniMax(tree, depth - 1, True)
+				temp = self.MiniMax(child, depth - 1, True)
 				bestValue = min(bestValue, temp)
 				tree.hVal = bestValue
 			return bestValue
