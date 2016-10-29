@@ -231,8 +231,7 @@ class Off_Heuristic(HeuristicOffense):
 					# piecePositions.append((row,col))
 					return (row, col)	
 		return (-1, -1) # When piece is not on a board return this tuple
-						
-	#Our 481 heuristic computes distances between our pieces and the enemy king
+		
 	def OffenseHeuristicValue(self, board):
 		whiteKnight = self.PiecePositions(board, "white", "knight")
 		whiteKing = self.PiecePositions(board, "white", "king")
@@ -247,20 +246,22 @@ class Off_Heuristic(HeuristicOffense):
 			retval -= 10000
 			
 		if whiteRook[0] == -1:
-			retval -= 10000
+			retval -= 20000
 			
 		
-		# Gain points for taking enemy knight
+		# Gain points for taking enemy knight, but not worth risking losing a piece
 		if blackKnight[0] == -1:
-			retval += 10000
+			retval += 8000
 			
 
 		# White king needs to be close to black king for checkmate, lower distance increases value
 		retval += 100 * (14 - (abs(whiteKing[0] - blackKing[0]) + abs(whiteKing[1] - blackKing[1])))
 
-		# Good to have knight close to black king to help put in check
+		# Good to have knight close to black king to help put in check, but not right next to it
 		if whiteKnight[0] != -1:
 			retval += 50 * (14 - (abs(whiteKnight[0] - blackKing[0]) + abs(whiteKnight[1] - blackKing[1])))
+			if 2 >= (abs(whiteKnight[0] - blackKing[0]) + abs(whiteKnight[1] - blackKing[1])):
+				retval -= 100
 		
 		# We want black king to be at edge
 		if blackKing[0] == 0 or blackKing[0] == 7\
@@ -303,33 +304,6 @@ class Off_Heuristic(HeuristicOffense):
 		bkRookDistance = abs(whiteRook[0] - blackKnight[0]) + abs(whiteRook[1] - blackKnight[1])
 		
 		toKingDistance = knightDistance + kingDistance + rookDistance
-		
-		# a few handlers to deal with heuristic values dealing with taking/prevntion of taking pieces
-		# bkKnight protects from black knight
-		# kingDistance finds check states
-		
-		if knightDistance > 1.5*kingDistance:
-			toKingDistance = -30
-		
-		if bkKnightDistance == 3:
-			toKingDistance = 50
-			
-		if bkKingDistance == 3:
-			toKingDistance = 50
-			
-		if bkRookDistance == 3:
-			toKingDistance = 50
-			
-		if knightDistance == -3:
-			toKingDistance = -20
-			
-		if kingDistance == -2:
-			toKingDistance = -20
-			
-		if rookActual == 0:
-			toKingDistance = -20
-				
-		return toKingDistance
 		"""
 		
 	def MiniMax(self, tree, depth, playerIndex):
@@ -476,36 +450,36 @@ class Def_Heuristic(HeuristicDefense):
 		whiteKing = self.PiecePositions(board, "white", "king")
 		whiteRook = self.PiecePositions(board, "white", "rook")
 		
-		knightDistance = abs(blackKing[0] - whiteKnight[0]) + abs(blackKing[1] - whiteKnight[1]) - 3
-		kingDistance = abs(blackKing[0] - whiteKing[0]) + abs(blackKing[1] - whiteKing[1]) - 2
-		rookActual = abs(whiteRook[0] - blackKing[0]) + abs(whiteRook[1] - blackKing[1])
-		rookDistance = 1
+		retval = 0
 		
-		bkKnightDistance = abs(whiteKnight[0] - blackKnight[0]) + abs(whiteKnight[1] - blackKnight[1])
-		bkKingDistance = abs(whiteKing[0] - blackKnight[0]) + abs(whiteKing[1] - blackKnight[1])
-		bkRookDistance = abs(whiteRook[0] - blackKnight[0]) + abs(whiteRook[1] - blackKnight[1])
+		#Good if white pieces are gone, best to take rook
+		if whiteRook[0] == -1:
+			retval += 12000
+		if whiteKnight[0] == -1:
+			retval += 8000
 		
-		fromKingDistance = knightDistance + kingDistance + rookDistance
+		# Bad if black knight is lost, but worth sacrificing to take rook
+		if blackKnight[0] == -1:
+			retval -= 10000
 		
-		if bkKnightDistance == 0:
-			fromKingDistance = 50
-			
-		if bkKingDistance == 0:
-			fromKingDistance = 50
-			
-		if bkRookDistance == 0:
-			fromKingDistance = 50
+		# Black king should not be near edge
+		if blackKing[0] == 0 or blackKing[0] == 7 or blackKing[1] == 0 or blackKing[1] == 7:
+			retval -= 200
+
+		# Higher value for king positions near center
+		retval += 100 * ((3.5 - abs(3.5 - blackKing[0])) + (3.5 - abs(3.5 - blackKing[1])))
 		
-		if knightDistance == -3:
-			fromKingDistance = -20
-			
-		if kingDistance == -2:
-			fromKingDistance = -20
-			
-		if rookActual == 0:
-			fromKingDistance = -20
+		# Knight should try to take out rook, but can't attack from right next to it
+		if whiteRook[0] != -1:
+			retval += 10 * (10 - (abs(whiteRook[0] - blackKnight[0]) + abs(whiteRook[1] - blackKnight[1])))
+			if 2 >= (abs(whiteRook[0] - blackKnight[0]) + abs(whiteRook[1] - blackKnight[1])):
+				retval -= 20
+		# Knight should avoid being on same row or column as rook
+		if blackKnight != -1 and whiteRook != -1:
+                        if blackKnight[0] == whiteRook[0] or blackKnight[1] == whiteRook[1]:
+                                retval -= 100
 		
-		return fromKingDistance
+		return retval
 		
 	def MiniMax(self, tree, depth, playerIndex):
 		if depth == 0 or not tree.children:
