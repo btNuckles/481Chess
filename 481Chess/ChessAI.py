@@ -164,7 +164,7 @@ class Off_Heuristic(HeuristicOffense):
 		
 		self.MiniMax(tree, 3, playerIndex)
 		
-		temp = -50000
+		temp = -10000
 		for child in tree.children:
 			#print(child.hVal)
 			#print(child.moveTuple)
@@ -246,8 +246,10 @@ class Off_Heuristic(HeuristicOffense):
 			retval -= 10000
 			
 		if whiteRook[0] == -1:
-			retval -= 20000
-			
+			retval -= 20000		
+
+		if whiteKing[0] == -1:
+			retval-= 100000
 		
 		# Gain points for taking enemy knight, but not worth risking losing a piece
 		if blackKnight[0] == -1:
@@ -265,7 +267,7 @@ class Off_Heuristic(HeuristicOffense):
 		
 		# We want black king to be at edge
 		if blackKing[0] == 0 or blackKing[0] == 7\
-		   or blackKing[1] == 0 or blackKing[1] == 7:
+			or blackKing[1] == 0 or blackKing[1] == 7:
 			retval += 1000
 			
 
@@ -352,7 +354,7 @@ class Def_Heuristic(HeuristicDefense):
 		
 		self.MiniMax(tree, 3, playerIndex)
 		
-		temp = -64
+		temp = -100000
 		for child in tree.children:
 			#print(child.hVal)
 			#print(child.moveTuple)
