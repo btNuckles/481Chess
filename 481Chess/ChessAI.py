@@ -164,7 +164,7 @@ class Off_Heuristic(HeuristicOffense):
 		
 		self.MiniMax(tree, 3, playerIndex)
 		
-		temp = -10000
+		temp = -1000000000
 		for child in tree.children:
 			#print(child.hVal)
 			#print(child.moveTuple)
@@ -246,10 +246,10 @@ class Off_Heuristic(HeuristicOffense):
 			retval -= 10000
 			
 		if whiteRook[0] == -1:
-			retval -= 20000		
+			retval -= 100000		
 
 		if whiteKing[0] == -1:
-			retval-= 100000
+			retval -= 1000000
 		
 		# Gain points for taking enemy knight, but not worth risking losing a piece
 		if blackKnight[0] == -1:
@@ -313,7 +313,7 @@ class Off_Heuristic(HeuristicOffense):
 			return self.OffenseHeuristicValue(tree.board.GetState())
 			
 		if playerIndex:	#CURRENT PLY == OFFENSE
-			bestValue = -100000
+			bestValue = -100000000
 			for child in tree.children:
 				temp = self.MiniMax(child, depth - 1, True)
 				bestValue = max(bestValue, temp)
@@ -322,7 +322,7 @@ class Off_Heuristic(HeuristicOffense):
 			return bestValue
 				
 		else:		#CURRENT PLY == DEFENSE
-			bestValue = 100000
+			bestValue = 100000000
 			for child in tree.children:
 				temp = self.MiniMax(child, depth - 1, False)
 				bestValue = min(bestValue, temp)
@@ -354,7 +354,7 @@ class Def_Heuristic(HeuristicDefense):
 		
 		self.MiniMax(tree, 3, playerIndex)
 		
-		temp = -100000
+		temp = -1000000000
 		for child in tree.children:
 			#print(child.hVal)
 			#print(child.moveTuple)
@@ -488,7 +488,7 @@ class Def_Heuristic(HeuristicDefense):
 			return self.DefenseHeuristicValue(tree.board.GetState())
 			
 		if playerIndex:	#CURRENT PLY == DEFENSE
-			bestValue = -64
+			bestValue = -100000000
 			for child in tree.children:
 				temp = self.MiniMax(child, depth - 1, False)
 				bestValue = max(bestValue, temp)
@@ -496,7 +496,7 @@ class Def_Heuristic(HeuristicDefense):
 			return bestValue
 				
 		else:		#CURRENT PLY == OFFENSE
-			bestValue = 64
+			bestValue = 100000000
 			for child in tree.children:
 				temp = self.MiniMax(child, depth - 1, True)
 				bestValue = min(bestValue, temp)
