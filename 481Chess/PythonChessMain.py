@@ -210,6 +210,8 @@ class PythonChessMain:
 				currentPlayer = "Y"
 			if self.Rules.IsInCheck(board,currentColor):
 				self.Gui.PrintMessage("Warning..."+self.player[currentPlayerIndex].GetName()+" ("+self.player[currentPlayerIndex].GetColor()+") is in check!") 
+			
+			move = ""
 			if self.player[currentPlayerIndex].GetType() == 'HeuristicDefense':
 			#	then get new move to put into MoveTuple and make move			
 				
