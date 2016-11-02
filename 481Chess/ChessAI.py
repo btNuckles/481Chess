@@ -525,18 +525,22 @@ class Def_Enemy(EnemyDefense):
 		
 		defenseMoveNotMade = True
 		while defenseMoveNotMade:
+			line = ""
 			textFile = open("log_Y.txt")
 			for line in textFile:
 				pass
 			
-			line = line.split(" ")
-			if line[1][0] == "Y":
-				#offenseMoveMade == False
-				token = line[1].split(':')
-				pieceType = token[1]
-				locationToMove = token[2]
-				break
-			textFile.close()
+			if line == "":
+				textFile.close()
+			else:
+				line = line.split(" ")
+				if line[1][0] == "Y":
+					defenseMoveNotMade = False
+					token = line[1].split(':')
+					pieceType = token[1]
+					locationToMove = token[2]
+					#break
+				textFile.close()
 			print("Waiting for defenses move")
 			
 		#print(pieceType)
@@ -635,19 +639,23 @@ class Off_Enemy(EnemyOffense):
 	def GetMove(self, board, color):	
 		
 		offenseMoveNotMade = True
-		while offenseMoveNotMade is True:
-			textFile = open("test.txt")
+		while offenseMoveNotMade:
+			line = ""
+			textFile = open("log_X.txt")
 			for line in textFile:
 				pass
-			line = line.split(" ")
-			if line[1][0] == "X":
-			#offenseMoveMade == False
-				token = line[1].split(':')
-				pieceType = token[1]
-				locationToMove = token[2]
-				break
-			textFile.close()
-			print("Waiting for defenses move")
+			if line == "":
+				textFile.close()
+			else:
+				line = line.split(" ")
+				if line[1][0] == "X":
+					offenseMoveNotMade = False
+					token = line[1].split(':')
+					pieceType = token[1]
+					locationToMove = token[2]
+					#break
+				textFile.close()
+			print("Waiting for offenses move")
 			
 		#print(pieceType)
 		#print(locationToMove)
@@ -684,7 +692,7 @@ class Off_Enemy(EnemyOffense):
 		moveTuple[1][0] = int(rowNum)
 		moveTuple[1][1] = columnNum
 		#moveTuple = ((rowNum,columnNum),((mypiecePosition[0]),(mypiecePosition[1])))
-		print moveTuple
+		#print moveTuple
 		return moveTuple
 	
 	def PiecePositions(self,board,color,pieceType):
