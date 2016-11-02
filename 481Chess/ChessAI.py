@@ -567,8 +567,27 @@ class Def_Enemy(EnemyDefense):
 			columnNum = 6
 		elif locationToMove[0] == 'h':
 			columnNum = 7
-			
-		rowNum = locationToMove[1]		
+	
+		#Remove this block if text file writing is backwards against enemy team
+		#Add rowNum = locationToMove[1]
+	
+		if locationToMove[1] == 0:
+			rowNum = 8
+		elif locationToMove[1] == 1:
+			rowNum = 7
+		elif locationToMove[1] == 2:
+			rowNum = 6
+		elif locationToMove[1] == 3:
+			rowNum = 5	
+		elif locationToMove[1] == 4:
+			rowNum = 4
+		elif locationToMove[1] == 5:
+			rowNum = 3
+		elif locationToMove[1] == 6:
+			rowNum = 2
+		elif locationToMove[1] == 7:
+			rowNum = 1
+					
 		
 		r, c = 2, 2 
 		moveTuple = [[0 for x in range(r)] for y in range(c)] 
@@ -682,7 +701,26 @@ class Off_Enemy(EnemyOffense):
 		elif locationToMove[0] == 'h':
 			columnNum = 7
 			
-		rowNum = locationToMove[1]		
+		#Remove this block if enemy team text file writing is reversed
+		#Add rowNum = locationToMove[1]
+			
+		if locationToMove[1] == 0:
+			rowNum = 8
+		elif locationToMove[1] == 1:
+			rowNum = 7
+		elif locationToMove[1] == 2:
+			rowNum = 6
+		elif locationToMove[1] == 3:
+			rowNum = 5	
+		elif locationToMove[1] == 4:
+			rowNum = 4
+		elif locationToMove[1] == 5:
+			rowNum = 3
+		elif locationToMove[1] == 6:
+			rowNum = 2
+		elif locationToMove[1] == 7:
+			rowNum = 1
+		
 		
 		r, c = 2, 2 
 		moveTuple = [[0 for x in range(r)] for y in range(c)] 

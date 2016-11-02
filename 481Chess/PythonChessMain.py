@@ -276,6 +276,7 @@ class PythonChessMain:
 		pieceRow = tuple[0][0]
 		pieceCol = tuple[0][1]
 		pieceToMove = board[pieceRow][pieceCol]
+		print tuple
 		
 		if tuple[1][1] == 0:
 			columnLetter = 'a'
@@ -293,24 +294,25 @@ class PythonChessMain:
 			columnLetter = 'g'
 		elif tuple[1][1] == 7:
 			columnLetter = 'h'
-			
-		if tuple[0][1] == 1:
+		
+
+		if tuple[1][0] == 0:
 			rowNumber = 8
-		elif tuple[0][1] == 2:
+		elif tuple[1][0] == 1:
 			rowNumber = 7
-		elif tuple[0][1] == 3:
+		elif tuple[1][0] == 2:
 			rowNumber = 6
-		elif tuple[0][1] == 4:
+		elif tuple[1][0] == 3:
 			rowNumber = 5	
-		elif tuple[0][1] == 5:
+		elif tuple[1][0] == 4:
 			rowNumber = 4
-		elif tuple[0][1] == 6:
+		elif tuple[1][0] == 5:
 			rowNumber = 3
-		elif tuple[0][1] == 7:
+		elif tuple[1][0] == 6:
 			rowNumber = 2
-		elif tuple[0][1] == 8:
+		elif tuple[1][0] == 7:
 			rowNumber = 1
-			
+		
 			
 		fileName = "log_" + currentPlayer + ".txt"
 		file = open(fileName, "a")
