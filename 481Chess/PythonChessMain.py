@@ -214,6 +214,7 @@ class PythonChessMain:
 			move = ""
 			if self.player[currentPlayerIndex].GetType() == 'HeuristicDefense':
 			#	then get new move to put into MoveTuple and make move			
+				currentPlayer = "Y"
 				
 				if turnCount > 2:
 					textFileX = open("log_X.txt", "r")
@@ -225,7 +226,6 @@ class PythonChessMain:
 					textFileX.close()
 				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor)
 				self.WriteMove(board, moveTuple, currentPlayer, turnCount)
-				currentPlayer = "Y"
 				
 			#	write to text file player_ytext below before changing currentPlayerIndex below
 			elif self.player[currentPlayerIndex].GetType() == 'HeuristicOffense':
