@@ -31,8 +31,10 @@ class Tree(object):
 		board = self.board.GetState() #Gets the current state of chess board
 		if color == 'white':
 			player = 'w'
+			thisPlayer = 'white'
 		if color == 'black':
 			player = 'b'
+			thisPlayer = 'black'
 		for r in range(8):
 			for c in range(8):
 				if board[r][c] != 'e':
@@ -47,15 +49,18 @@ class Tree(object):
 							tempChessBoard = copy.deepcopy(self.board)
 							tempChessBoard.MovePiece((tup, moves))
 							#print(tup, moves)
-							tempTreeObj = Tree(tempChessBoard)
-							tempTreeObj.moveTuple = ((tup, moves))
-							self.add_child(tempTreeObj)
-							for child in self.children:
-								if player == 'b':
-									color = 'white'
-								elif player == 'w':
-									color = 'black'
-							child.create_tree(color,rules,ply-1)                                                        
+							#if ply == 3 and player == 'b':
+							#	print (tup, rules.IsInCheck(tempChessBoard.GetState(), color), color)
+							if not rules.IsInCheck(tempChessBoard.GetState(), thisPlayer):
+								tempTreeObj = Tree(tempChessBoard)
+								tempTreeObj.moveTuple = ((tup, moves))
+								self.add_child(tempTreeObj)
+								for child in self.children:
+									if player == 'b':
+										color = 'white'
+									elif player == 'w':
+										color = 'black'
+								child.create_tree(color,rules,ply-1)                                                        
 
 #PROTOTYPE AI CLASS
 #class ChessAI:
@@ -246,14 +251,14 @@ class Off_Heuristic(HeuristicOffense):
 			retval -= 10000
 			
 		if whiteRook[0] == -1:
-			retval -= 100000		
+			retval -= 10000000		
 
 		if whiteKing[0] == -1:
-			retval -= 1000000
+			retval -= 100000000
 		
 		# Gain points for taking enemy knight, but not worth risking losing a piece
 		if blackKnight[0] == -1:
-			retval += 8000
+			retval += 1000
 			
 
 		# White king needs to be close to black king for checkmate, lower distance increases value
@@ -277,12 +282,12 @@ class Off_Heuristic(HeuristicOffense):
 			retval -= 900
 			
 		
-		# Rook can make barrier to block black king from center. Good if +/- 1 row/col
+		# Rook can make barrier to block black king from center. Good if 1 row/col away on same side as white king
 		if (whiteKing[0] > blackKing[0] and whiteRook[0] == (blackKing[0] + 1))\
 		   or (whiteKing[1] > blackKing[1] and whiteRook[1] == (blackKing[1] + 1))\
 		   or (whiteKing[0] < blackKing[0] and whiteRook[0] == (blackKing[0] - 1))\
 		   or (whiteKing[1] < blackKing[1] and whiteRook[1] == (blackKing[1] - 1)):
-			retval += 500
+			retval += 10000
 			
 
 		# Checkmate conditions: black king at edge, kings 2 or 3 apart, rook on same edge as black king
@@ -290,7 +295,7 @@ class Off_Heuristic(HeuristicOffense):
 		   and ((abs(whiteKing[0] - blackKing[0]) + abs(whiteKing[1] - blackKing[1])) == 2) \
 		   and ( (blackKing[0] == 0 and whiteRook[0] == 0) or (blackKing[0] == 7 and whiteRook[0] == 7)\
 			 or (blackKing[1] == 0 and whiteRook[1] == 0) or (blackKing[1] == 7 and whiteRook[1] == 7)):
-			retval += 100000
+			retval += 1000000
 			
 		#print retval
 		return retval
@@ -478,8 +483,8 @@ class Def_Heuristic(HeuristicDefense):
 				retval -= 20
 		# Knight should avoid being on same row or column as rook
 		if blackKnight != -1 and whiteRook != -1:
-                        if blackKnight[0] == whiteRook[0] or blackKnight[1] == whiteRook[1]:
-                                retval -= 100
+			if blackKnight[0] == whiteRook[0] or blackKnight[1] == whiteRook[1]:
+				retval -= 100
 		
 		return retval
 		
