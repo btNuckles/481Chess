@@ -216,7 +216,7 @@ class PythonChessMain:
 			#	then get new move to put into MoveTuple and make move			
 				currentPlayer = "Y"
 				
-				if turnCount > 2:
+				if turnCount > 1:
 					textFileX = open("log_X.txt", "r")
 					for line in textFileX:
 						move = line	
@@ -294,15 +294,33 @@ class PythonChessMain:
 		elif tuple[1][1] == 7:
 			columnLetter = 'h'
 			
+		if tuple[0][1] == 1:
+			rowNumber = 8
+		elif tuple[0][1] == 2:
+			rowNumber = 7
+		elif tuple[0][1] == 3:
+			rowNumber = 6
+		elif tuple[0][1] == 4:
+			rowNumber = 5	
+		elif tuple[0][1] == 5:
+			rowNumber = 4
+		elif tuple[0][1] == 6:
+			rowNumber = 3
+		elif tuple[0][1] == 7:
+			rowNumber = 2
+		elif tuple[0][1] == 8:
+			rowNumber = 1
+			
+			
 		fileName = "log_" + currentPlayer + ".txt"
 		file = open(fileName, "a")
-		file.write(str(turnCount) + " " + currentPlayer + ":" + pieceToMove[1] + ":" + columnLetter + str(tuple[1][0] + 1) + "\n")
+		file.write(str(turnCount) + " " + currentPlayer + ":" + pieceToMove[1] + ":" + columnLetter + str(rowNumber) + "\n")
 		file.close()
 		
-		if turnCount == 1:
-			fileName = open("log_Y.txt", "w")
-			fileName.write(str(turnCount) + " " + currentPlayer + ":" + pieceToMove[1] + ":" + columnLetter + str(tuple[1][0] + 1) + "\n")
-			fileName.close()
+		#if turnCount == 1:
+		#	fileName = open("log_Y.txt", "w")
+		#	fileName.write(str(turnCount) + " " + currentPlayer + ":" + pieceToMove[1] + ":" + columnLetter + str(tuple[1][0] + 1) + "\n")
+		#	fileName.close()
 			
 			
 
