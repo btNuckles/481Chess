@@ -570,7 +570,7 @@ class Def_Enemy(EnemyDefense):
 	
 		#Remove this block if text file writing is backwards against enemy team
 		#Add rowNum = locationToMove[1]
-	
+		
 		if locationToMove[1] == 1:
 			rowNum = 7
 		elif locationToMove[1] == 2:
@@ -585,7 +585,8 @@ class Def_Enemy(EnemyDefense):
 			rowNum = 2
 		elif locationToMove[1] == 7:
 			rowNum = 1
-		elif locationToMove[1] == 8:
+		# elif locationToMove[1] == 8:
+		else:
 			rowNum = 0
 					
 		
@@ -703,7 +704,7 @@ class Off_Enemy(EnemyOffense):
 			
 		#Remove this block if enemy team text file writing is reversed
 		#Add rowNum = locationToMove[1]
-			
+
 		if locationToMove[1] == 1:
 			rowNum = 7
 		elif locationToMove[1] == 2:
@@ -718,7 +719,8 @@ class Off_Enemy(EnemyOffense):
 			rowNum = 2
 		elif locationToMove[1] == 7:
 			rowNum = 1
-		elif locationToMove[1] == 8:
+		# elif locationToMove[1] == 8:
+		else:
 			rowNum = 0
 		
 		
