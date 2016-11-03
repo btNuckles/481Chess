@@ -520,7 +520,7 @@ class Def_Enemy(EnemyDefense):
 		self.Board = Board
 		EnemyDefense.__init__(self, name, color)
 		
-	def GetMove(self, board, color):
+	def GetMove(self, board, color, turnCount):
 		#myPieces = self.GetMyPiecesWithLegalMoves(board,color)
 		
 		defenseMoveNotMade = True
@@ -531,6 +531,9 @@ class Def_Enemy(EnemyDefense):
 				pass
 			
 			if line == "":
+				textFile.close()
+			elif line[0] < turnCount - 1:
+				print("still waiting")
 				textFile.close()
 			else:
 				line = line.split(" ")
@@ -545,6 +548,8 @@ class Def_Enemy(EnemyDefense):
 			
 		#print(pieceType)
 		#print(locationToMove)
+		
+		print locationToMove
 			
 			
 			
@@ -571,24 +576,22 @@ class Def_Enemy(EnemyDefense):
 		#Remove this block if text file writing is backwards against enemy team
 		#Add rowNum = locationToMove[1]
 		
-		if locationToMove[1] == 1:
+		if locationToMove[1] == '1':
 			rowNum = 7
-		elif locationToMove[1] == 2:
+		elif locationToMove[1] == '2':
 			rowNum = 6
-		elif locationToMove[1] == 3:
+		elif locationToMove[1] == '3':
 			rowNum = 5
-		elif locationToMove[1] == 4:
+		elif locationToMove[1] == '4':
 			rowNum = 4	
-		elif locationToMove[1] == 5:
+		elif locationToMove[1] == '5':
 			rowNum = 3
-		elif locationToMove[1] == 6:
+		elif locationToMove[1] == '6':
 			rowNum = 2
-		elif locationToMove[1] == 7:
+		elif locationToMove[1] == '7':
 			rowNum = 1
-		# elif locationToMove[1] == 8:
-		else:
+		elif locationToMove[1] == '8':
 			rowNum = 0
-					
 		
 		r, c = 2, 2 
 		moveTuple = [[0 for x in range(r)] for y in range(c)] 
@@ -656,7 +659,7 @@ class Off_Enemy(EnemyOffense):
 	#USE THIS MOVE TUPLE TO USE THE MAKEMOVE FUNCTION IN MAIN FOR CURRENT PLAYER TYPE
 	#THIS IS FOR THE SAKE OF UPDATING OUR OWN BOARD SO WE CAN MAKE OUR NEXT MOVE
 	
-	def GetMove(self, board, color):	
+	def GetMove(self, board, color, turnCount):	
 		
 		offenseMoveNotMade = True
 		while offenseMoveNotMade:
@@ -665,6 +668,9 @@ class Off_Enemy(EnemyOffense):
 			for line in textFile:
 				pass
 			if line == "":
+				textFile.close()
+			elif line[0] < turnCount - 1:
+				print("still waiting")
 				textFile.close()
 			else:
 				line = line.split(" ")
@@ -680,7 +686,7 @@ class Off_Enemy(EnemyOffense):
 		#print(pieceType)
 		#print(locationToMove)
 			
-			
+		print locationToMove
 			
 
 		mypiecePosition = self.PiecePositions(board, color, pieceType[0])
@@ -701,26 +707,25 @@ class Off_Enemy(EnemyOffense):
 			columnNum = 6
 		elif locationToMove[0] == 'h':
 			columnNum = 7
-			
-		#Remove this block if enemy team text file writing is reversed
+	
+		#Remove this block if text file writing is backwards against enemy team
 		#Add rowNum = locationToMove[1]
-
-		if locationToMove[1] == 1:
+		
+		if locationToMove[1] == '1':
 			rowNum = 7
-		elif locationToMove[1] == 2:
+		elif locationToMove[1] == '2':
 			rowNum = 6
-		elif locationToMove[1] == 3:
+		elif locationToMove[1] == '3':
 			rowNum = 5
-		elif locationToMove[1] == 4:
+		elif locationToMove[1] == '4':
 			rowNum = 4	
-		elif locationToMove[1] == 5:
+		elif locationToMove[1] == '5':
 			rowNum = 3
-		elif locationToMove[1] == 6:
+		elif locationToMove[1] == '6':
 			rowNum = 2
-		elif locationToMove[1] == 7:
+		elif locationToMove[1] == '7':
 			rowNum = 1
-		# elif locationToMove[1] == 8:
-		else:
+		elif locationToMove[1] == '8':
 			rowNum = 0
 		
 		

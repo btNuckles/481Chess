@@ -245,11 +245,11 @@ class PythonChessMain:
 			# #	then get new move to put into Movetuple and make move
 			# #	write to text file player_xtext below before changing currentPlayerIndex below
 			elif self.player[currentPlayerIndex].GetType() == 'EnemyDefense':
-				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor)
+				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor, turnCount)
 			# 	#CALL READ FUNCTION HERE FOR ENEMY PLAYER == DEFENSE KRUTIK
 			# 	#moveTuple = defense read function
 			elif self.player[currentPlayerIndex].GetType() == 'EnemyOffense':
-				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor)
+				moveTuple = self.player[currentPlayerIndex].GetMove(self.Board.GetState(), currentColor, turnCount)
 			# 	#CALL READ FUNCTION HERE FOR ENEMY PLAYER == OFFENSE KRUTIK
 			# 	#moveTuple = offense read function
 			else:
