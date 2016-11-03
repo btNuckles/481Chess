@@ -751,7 +751,8 @@ class Off_Enemy(EnemyOffense):
 			myPieceType = 'K'
 		elif pieceType == "R":
 			myPieceType = 'R'
-		elif pieceType == "T":
+		# elif pieceType == "T":
+		else:
 			myPieceType = 'T'
 
 
