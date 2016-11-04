@@ -183,8 +183,8 @@ class PythonChessMain:
 	def MainLoop(self):
 		currentPlayerIndex = 0
 		turnCount = 0
-		open("log_X.txt", "w").close()
-		open("log_Y.txt", "w").close()
+		# open("log_X.txt", "w").close()
+		# open("log_Y.txt", "w").close()
 		prevBoards = []  #To compare previous boards
 		while not self.Rules.IsCheckmate(self.Board.GetState(),self.player[currentPlayerIndex].color):
 			board = self.Board.GetState()
