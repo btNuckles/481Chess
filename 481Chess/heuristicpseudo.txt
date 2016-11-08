@@ -1,0 +1,101 @@
+def OffenseHeuristicValue(board):
+	
+	return g(board) + h(board)
+	
+	def g(board):
+		
+		retval = 0
+		
+		# Board value loses points for missing white rook or knight
+		if white knight is not on board:
+			retval -= 10000
+			
+		if white rook is not on board:
+			retval -= 10000000
+		
+		return retval
+			
+	def h(board):
+		
+		retval = 0
+		
+		# Gain points for taking enemy knight, but not worth risking losing a piece
+		if black knight is not on board:
+			retval += 1000
+		
+		# White king needs to be close to black king for checkmate, lower distance increases value
+		retval += 100 * (14 - distance between kings)
+
+		# Good to have knight close to black king to help put in check, but not right next to it
+		if white knight is on board:
+			retval += 50 * (14 - distance between white knight and black king)
+			if 2 >= (distance between white knight and black king):
+				retval -= 100
+		
+		# We want black king to be at edge
+		if black king row or column is 0 or 7:
+			retval += 1000
+
+		# But don't want white king at edge, could allow black king to move to center
+		if white king row or column is 0 or 7:
+			retval -= 900
+			
+		
+		# Rook can make barrier to block black king from center. Good if 1 row/col away on same side as white king
+		if white rook is 1 row or column away from black king in direction of white king:
+			retval += 10000
+			
+
+		# Checkmate conditions: black king at edge, kings 2 or 3 apart, rook on same edge as black king
+		if black king row or column is 0 or 7,
+		   and distance between kings is 2,
+		   and white rook is on same edge as black king:
+			retval += 1000000
+			
+		return retval
+
+
+def DefenseHeuristicValue(self, board):
+	
+	return g(board) + h(board)
+		
+	def g(board):
+		
+		retval = 0
+		
+		# Bad if black knight is lost, but worth sacrificing to take rook
+		if black knight is not on board:
+			retval -= 10000
+		
+		return retval
+		
+	def h(board):
+		
+		retval = 0
+		
+		#Good if white pieces are gone, best to take rook
+		if white rook is not on board:
+			retval += 12000
+		if white knight is not on board:
+			retval += 8000
+		
+		# Black king should not be near edge
+		if black king row or column is 0 or 7:
+			retval -= 200
+			
+		# Higher value for king positions near center
+		retval += 100 * (distance from row edge + distance from column edge)
+		
+		# Knight should try to take out rook, but can't attack from right next to it
+		if white rook is on board:
+			retval += 10 * (10 - distance between black knight and white rook)
+			if 2 >= distance between black knight and white rook:
+				retval -= 20
+				
+		# Knight should avoid being on same row or column as rook
+		if black knight and white rook are both on board:
+			if black knight is on same row or column as white rook:
+				retval -= 100
+		
+		return retval
+		
